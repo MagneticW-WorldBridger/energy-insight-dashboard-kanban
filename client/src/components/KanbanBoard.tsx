@@ -22,7 +22,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.source.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+        (Array.isArray(item.tags) && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
       );
     }
     
@@ -44,7 +44,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
     
     if (filters.procedure && filters.procedure !== 'All Procedures') {
       filteredItems = filteredItems.filter(item => 
-        item.tags.some(tag => tag.includes(filters.procedure || ''))
+        Array.isArray(item.tags) && item.tags.some(tag => tag.includes(filters.procedure || ''))
       );
     }
     
