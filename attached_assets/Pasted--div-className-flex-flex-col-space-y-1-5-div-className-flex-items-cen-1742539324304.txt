@@ -1,0 +1,683 @@
+<div className="flex flex-col space-y-1.5">
+                          <div className="flex items-center">
+                            <span className="inline-block w-20 text-xs text-gray-500 truncate">Interest:</span>
+                            <span className="text-xs font-medium text-gray-700">{item.source}</span>
+                          </div>
+                          
+                          {item.smsStatus && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">SMS:</span>
+                              <div className="flex items-center">
+                                <span className={`inline-block w-2 h-2 rounded-full mr-1 ${
+                                  item.smsStatus === 'Delivered' ? 'bg-green-500' : 
+                                  item.smsStatus === 'Sent' ? 'bg-blue-500' : 'bg-yellow-500'
+                                }`}></span>
+                                <span className={`text-xs font-medium ${
+                                  item.smsStatus === 'Delivered' ? 'text-green-600' : 
+                                  item.smsStatus === 'Sent' ? 'text-blue-600' : 'text-yellow-600'
+                                }`}>
+                                  {item.smsStatus}
+                                </span>
+                                <span className="ml-2 text-gray-400 text-xs">{item.sendTime}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {item.verifiedTime && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Verified:</span>
+                              <span className="text-xs font-medium text-green-600">{item.verifiedTime}</span>
+                            </div>
+                          )}
+
+                          {item.consultDate && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-import React, { useState } from 'react';
+import { Clock, CheckCircle, AlertTriangle, X, Info, ArrowRightCircle, User, MessageCircle, Phone, Search, Calendar, FileText, BarChart2, TrendingUp, DollarSign, Star, Filter, Eye, ChevronDown, Settings, Menu } from 'lucide-react';
+
+const AestheticsMedicalLeadDashboard = () => {
+  // Sample data for leads in different stages
+  const [columns, setColumns] = useState({
+    newLeads: {
+      title: 'New Leads',
+      count: 28,
+      items: [
+        { 
+          id: 1, 
+          name: 'Sarah Johnson', 
+          username: '@sarahj', 
+          time: '5m ago', 
+          source: 'Botox Story Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Injectables', 'Botox/Daxxify'],
+          assessment: "Pending"
+        },
+        { 
+          id: 2, 
+          name: 'Michael Chen', 
+          username: '@mike_c', 
+          time: '12m ago', 
+          source: 'Clinic Profile Visit', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Rhinoplasty'],
+          assessment: "Pending"
+        },
+        { 
+          id: 3, 
+          name: 'Emily Roberts', 
+          username: '@em_roberts', 
+          time: '25m ago', 
+          source: 'Before/After Post', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Dermal Fillers'],
+          assessment: "Pending"
+        },
+        { 
+          id: 4, 
+          name: 'David Williams', 
+          username: '@davewill', 
+          time: '32m ago', 
+          source: 'Facial Treatment Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Aesthetics', 'Scar Revision'],
+          assessment: "Pending"
+        },
+        { 
+          id: 5, 
+          name: 'Lina Ahmed', 
+          username: '@lina_a', 
+          time: '40m ago', 
+          source: 'Profile Visit', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Body', 'Awake VASER Lipo'],
+          assessment: "Pending"
+        }
+      ]
+    },
+          pendingSMS: {
+      title: 'SMS Sent',
+      count: 14,
+      items: [
+        { 
+          id: 6, 
+          name: 'James Wilson', 
+          username: '@jamwilson', 
+          time: '1h ago', 
+          source: 'Aveli Cellulite Post', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Aesthetics', 'Aveli Treatment'], 
+          smsStatus: 'Delivered', 
+          sendTime: '10:22 AM',
+          assessment: "Pending"
+        },
+        { 
+          id: 7, 
+          name: 'Sophia Garcia', 
+          username: '@sophiag', 
+          time: '1h ago', 
+          source: 'Facelift Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Facelift'], 
+          smsStatus: 'Sent', 
+          sendTime: '10:25 AM',
+          assessment: "Pending"
+        },
+        { 
+          id: 8, 
+          name: 'Alex Thompson', 
+          username: '@alexthom', 
+          time: '2h ago', 
+          source: 'Profile Visit', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Breast', 'Fat Transfer'], 
+          smsStatus: 'Delivered', 
+          sendTime: '9:45 AM',
+          assessment: "Pending"
+        },
+        { 
+          id: 9, 
+          name: 'Jessica Lee', 
+          username: '@jesslee', 
+          time: '3h ago', 
+          source: 'PDO Thread Post', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'PDO Thread Lift'], 
+          smsStatus: 'Pending', 
+          sendTime: '9:15 AM',
+          assessment: "Pending"
+        }
+      ]
+    },
+    verified: {
+      title: 'Identity Verified',
+      count: 32,
+      items: [
+        { 
+          id: 10, 
+          name: 'Robert Brown', 
+          username: '@robbrown', 
+          time: '4h ago', 
+          source: 'Male HD Lipo Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Body', 'HD VASER Lipo'], 
+          verifiedTime: '11:32 AM', 
+          score: 85,
+          assessment: {
+            likelihood: 6.2,
+            benefits: 5.8,
+            overall: "High Intent"
+          }
+        },
+        { 
+          id: 11, 
+          name: 'Olivia Kim', 
+          username: '@oliviak', 
+          time: '5h ago', 
+          source: 'Profile Visit', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Injectables', 'Dermal Fillers'], 
+          verifiedTime: '10:47 AM', 
+          score: 92,
+          assessment: {
+            likelihood: 5.9,
+            benefits: 6.4,
+            overall: "High Intent"
+          }
+        },
+        { 
+          id: 12, 
+          name: 'Carlos Mendez', 
+          username: '@carlosm', 
+          time: '6h ago', 
+          source: 'Chin Contouring Post', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Jawline Chin Contouring'], 
+          verifiedTime: '9:20 AM', 
+          score: 78,
+          assessment: {
+            likelihood: 4.1,
+            benefits: 5.3,
+            overall: "Medium Intent"
+          }
+        },
+        { 
+          id: 13, 
+          name: 'Hannah Park', 
+          username: '@hannahp', 
+          time: '6h ago', 
+          source: 'Non-Surgical Nose Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Non-surgical Rhinoplasty'], 
+          verifiedTime: '9:05 AM', 
+          score: 88,
+          assessment: {
+            likelihood: 5.6,
+            benefits: 5.1,
+            overall: "Medium Intent"
+          }
+        }
+      ]
+    },
+    qualified: {
+      title: 'Consultation Ready',
+      count: 18,
+      items: [
+        { 
+          id: 14, 
+          name: 'Daniel Martinez', 
+          username: '@daniel_m', 
+          time: '1d ago', 
+          source: 'BBL Post Engagement', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Butt', 'HD BBL'], 
+          qualScore: 95, 
+          priority: 'High Intent', 
+          consultDate: 'Mar 21',
+          assessment: {
+            likelihood: 6.8,
+            benefits: 6.5,
+            overall: "High Intent"
+          },
+          financing: "Care Credit"
+        },
+        { 
+          id: 15, 
+          name: 'Natalie Wong', 
+          username: '@nataliew', 
+          time: '1d ago', 
+          source: 'Story Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Body', 'Traditional Lipo'], 
+          qualScore: 82, 
+          priority: 'Medium Intent', 
+          consultDate: 'Mar 22',
+          assessment: {
+            likelihood: 4.5,
+            benefits: 5.8,
+            overall: "Medium Intent"
+          },
+          financing: "Payment Plan"
+        },
+        { 
+          id: 16, 
+          name: 'Ryan Jackson', 
+          username: '@ryanj', 
+          time: '1d ago', 
+          source: 'Before/After Post', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Eyelid Surgery'], 
+          qualScore: 88, 
+          priority: 'High Intent', 
+          consultDate: 'Mar 20',
+          assessment: {
+            likelihood: 6.3,
+            benefits: 6.7,
+            overall: "High Intent"
+          },
+          financing: "Self-Pay"
+        }
+      ]
+    },
+    failed: {
+      title: 'Failed Verification',
+      count: 8,
+      items: [
+        { 
+          id: 17, 
+          name: 'Taylor Smith', 
+          username: '@taylors', 
+          time: '1d ago', 
+          source: 'Profile Visit', 
+          avatar: '/api/placeholder/40/40', 
+          reason: 'SMS undeliverable',
+          assessment: "Incomplete"
+        },
+        { 
+          id: 18, 
+          name: 'Kevin Zhang', 
+          username: '@kevinz', 
+          time: '2d ago', 
+          source: 'Story Ad', 
+          avatar: '/api/placeholder/40/40', 
+          reason: 'Verification timeout',
+          assessment: "Incomplete"
+        },
+        { 
+          id: 19, 
+          name: 'Mia Johnson', 
+          username: '@miaj', 
+          time: '2d ago', 
+          source: 'Before/After Post', 
+          avatar: '/api/placeholder/40/40', 
+          reason: 'Out of service area',
+          assessment: {
+            likelihood: 2.1,
+            benefits: 3.4,
+            overall: "Low Intent"
+          },
+          notes: "Outside CA, OR, WA, AZ, NV, UT, CO, NM regions"
+        }
+      ]
+    }
+  });
+
+  // Summary stats
+  const stats = {
+    totalLeads: 100,
+    newLeadsToday: 32,
+    consultsBooked: 18,
+    smsResponseRate: 67
+  };
+
+  // Column background colors - More subtle, minimalist design
+  const columnColors = {
+    newLeads: 'bg-gray-50',
+    pendingSMS: 'bg-gray-50',
+    verified: 'bg-gray-50',
+    qualified: 'bg-gray-50',
+    failed: 'bg-gray-50'
+  };
+
+  // Column header colors - Black and gold theme to match website
+  const columnHeaderColors = {
+    newLeads: 'bg-gray-900 text-amber-300',
+    pendingSMS: 'bg-gray-900 text-amber-300',
+    verified: 'bg-gray-900 text-amber-300',
+    qualified: 'bg-gray-900 text-amber-300',
+    failed: 'bg-gray-900 text-amber-300'
+  };
+
+  // Service category colors - More muted and elegant
+  const getServiceColor = (category) => {
+    const categories = {
+      'Aesthetics': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'Body': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'Butt': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'Breast': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'Face': 'bg-gray-100 text-gray-800 border border-gray-200',
+      'Injectables': 'bg-gray-100 text-gray-800 border border-gray-200'
+    };
+    
+    return categories[category] || 'bg-gray-100 text-gray-800 border border-gray-200';
+  };
+
+  // Procedure colors - Lighter for secondary information
+  const getProcedureColor = (procedure) => {
+    return 'bg-blue-50 text-blue-900 border border-blue-100';
+  };
+
+  // Intent colors - Subtle gold accent for high intent, grayscale for others
+  const getIntentColor = (intent) => {
+    const colors = {
+      'High Intent': 'bg-amber-400 text-gray-900',
+      'Medium Intent': 'bg-gray-400 text-white',
+      'Low Intent': 'bg-gray-600 text-white'
+    };
+    
+    return colors[intent] || 'bg-gray-200 text-gray-800';
+  };
+
+  // Render assessment badge with minimalist styling
+  const renderAssessmentBadge = (assessment) => {
+    if (assessment === "Pending" || assessment === "Incomplete") {
+      return (
+        <span className="bg-gray-200 text-gray-700 text-xs px-2 py-0.5 rounded-sm">
+          {assessment}
+        </span>
+      );
+    }
+    
+    return (
+      <span className={`text-xs px-3 py-0.5 rounded-sm font-medium ${getIntentColor(assessment.overall)}`}>
+        {assessment.overall}
+      </span>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-white">
+      {/* Header with black and gold theme to match website */}
+      <div className="bg-gray-900 text-white shadow-md">
+        <div className="container mx-auto p-4">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center space-x-4">
+              <div className="bg-black p-2 rounded">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" stroke="#D4AF37" strokeWidth="2"/>
+                  <path d="M8 12L11 15L16 9" stroke="#D4AF37" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold tracking-tight">Aesthetic & Cosmetic Surgeons</h1>
+            </div>
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <input 
+                  type="text" 
+                  placeholder="Search leads..." 
+                  className="pl-9 pr-4 py-2.5 border-0 rounded text-sm focus:outline-none focus:ring-1 focus:ring-amber-400 w-64 shadow-inner bg-gray-800 text-white placeholder-gray-400"
+                />
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+              </div>
+              <button className="p-2 rounded hover:bg-gray-800 transition-colors">
+                <Settings className="h-5 w-5 text-amber-300" />
+              </button>
+              <div className="flex items-center space-x-2 bg-black rounded px-3 py-1.5">
+                <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+                <span className="text-sm font-medium">Dr. Jain</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Subheader with period selection */}
+      <div className="bg-white border-b shadow-sm p-3">
+        <div className="container mx-auto flex justify-between items-center">
+          <h2 className="text-lg font-medium text-gray-800">Lead Assessment Dashboard</h2>
+          <div className="flex items-center space-x-3">
+            <button className="inline-flex items-center space-x-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded text-sm transition-colors">
+              <Calendar className="h-4 w-4 text-gray-600" />
+              <span>Today</span>
+              <ChevronDown className="h-4 w-4 text-gray-600" />
+            </button>
+            <button className="inline-flex items-center space-x-1 bg-gray-100 hover:bg-gray-200 px-3 py-1.5 rounded text-sm transition-colors">
+              <Filter className="h-4 w-4 text-gray-600" />
+              <span>Filters</span>
+              <ChevronDown className="h-4 w-4 text-gray-600" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats - Enhanced with neuroscience principles */}
+      <div className="container mx-auto grid grid-cols-4 gap-4 p-4">
+        <div className="bg-white rounded shadow-sm p-4 flex items-center border border-gray-100">
+          <div className="rounded bg-gray-900 p-3 mr-4">
+            <User className="h-6 w-6 text-amber-300" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Total Leads</p>
+            <p className="text-2xl font-bold tracking-tight">{stats.totalLeads}</p>
+          </div>
+        </div>
+        <div className="bg-white rounded shadow-sm p-4 flex items-center border border-gray-100">
+          <div className="rounded bg-gray-900 p-3 mr-4">
+            <TrendingUp className="h-6 w-6 text-amber-300" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Today's New Leads</p>
+            <p className="text-2xl font-bold tracking-tight">32</p>
+          </div>
+        </div>
+        <div className="bg-white rounded shadow-sm p-4 flex items-center border border-gray-100">
+          <div className="rounded bg-gray-900 p-3 mr-4">
+            <Calendar className="h-6 w-6 text-amber-300" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">Consults Booked</p>
+            <p className="text-2xl font-bold tracking-tight">18</p>
+          </div>
+        </div>
+        <div className="bg-white rounded shadow-sm p-4 flex items-center border border-gray-100">
+          <div className="rounded bg-gray-900 p-3 mr-4">
+            <MessageCircle className="h-6 w-6 text-amber-300" />
+          </div>
+          <div>
+            <p className="text-sm text-gray-500 font-medium">SMS Response Rate</p>
+            <p className="text-2xl font-bold tracking-tight">67%</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Enhanced Filter System - Gestalt Law of Proximity for related filters */}
+      <div className="container mx-auto px-4 mb-4">
+        <div className="bg-white rounded shadow-sm p-3 border border-gray-100">
+          <div className="flex flex-wrap gap-3">
+            {/* Intent filters */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Intent:</span>
+              <button className="bg-white border border-gray-900 text-gray-900 px-3 py-1 rounded text-sm">
+                All
+              </button>
+              <button className="bg-amber-400 text-gray-900 px-3 py-1 rounded text-sm">
+                High
+              </button>
+              <button className="bg-gray-400 text-white px-3 py-1 rounded text-sm">
+                Medium
+              </button>
+              <button className="bg-gray-600 text-white px-3 py-1 rounded text-sm">
+                Low
+              </button>
+            </div>
+
+            <div className="h-6 border-l border-gray-300 mx-1"></div>
+
+            {/* Service filters */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-medium text-gray-500 uppercase tracking-wider">Service:</span>
+              <button className="bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded text-sm">
+                All
+              </button>
+              <button className="bg-gray-100 border border-gray-200 text-gray-800 px-3 py-1 rounded text-sm">
+                Aesthetics
+              </button>
+              <button className="bg-gray-100 border border-gray-200 text-gray-800 px-3 py-1 rounded text-sm">
+                Body
+              </button>
+              <button className="bg-gray-100 border border-gray-200 text-gray-800 px-3 py-1 rounded text-sm">
+                Butt
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Kanban Board - Enhanced with visual hierarchy and Gestalt principles */}
+      <div className="container mx-auto flex-1 px-4 pb-4 overflow-x-auto">
+        <div className="flex space-x-5 h-full min-w-max">
+          {Object.keys(columns).map((columnId) => (
+            <div 
+              key={columnId}
+              className="w-72 flex flex-col rounded shadow-sm"
+            >
+              <div className={`p-3 font-medium flex justify-between items-center ${columnHeaderColors[columnId]}`}>
+                <div className="flex items-center">
+                  <span className="font-medium">{columns[columnId].title}</span>
+                  <span className="ml-2 bg-black bg-opacity-20 text-xs px-2 py-0.5 rounded">
+                    {columns[columnId].count}
+                  </span>
+                </div>
+              </div>
+              
+              <div className={`flex-1 overflow-y-auto p-2 rounded-b-xl ${columnColors[columnId]}`}>
+                {columns[columnId].items.map((item) => (
+                  <div key={item.id} className="bg-white rounded-lg shadow-sm mb-3 overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
+                    {/* Card header with gradient based on assessment */}
+                    <div className={`h-1 ${typeof item.assessment === 'object' ? 
+                      getIntentColor(item.assessment.overall).replace("text-white", "") : 
+                      'bg-gray-200'}`}>
+                    </div>
+                    
+                      <div className="p-3 space-y-3">
+                      <div className="flex justify-between items-start mb-2">
+                        <div className="flex items-center">
+                          <div className="relative">
+                            <img src={item.avatar} alt={item.name} className="w-10 h-10 rounded-full mr-3 border-2 border-white shadow-sm" />
+                            <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-gray-100 flex items-center justify-center">
+                              <Eye className="h-3 w-3 text-blue-500" />
+                            </div>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-gray-900">{item.name}</h3>
+                            <p className="text-xs text-gray-500">{item.username}</p>
+                          </div>
+                        </div>
+                        <div className="text-xs">
+                          {renderAssessmentBadge(item.assessment)}
+                        </div>
+                      </div>
+                      
+                        <div className="flex flex-col space-y-1.5">
+                          <div className="flex items-center">
+                            <span className="inline-block w-20 text-xs text-gray-500 truncate">Interest:</span>
+                            <span className="text-xs font-medium text-gray-700">{item.source}</span>
+                          </div>
+                          
+                          {item.smsStatus && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">SMS:</span>
+                              <div className="flex items-center">
+                                <span className={`inline-block w-2 h-2 rounded-full mr-1 ${
+                                  item.smsStatus === 'Delivered' ? 'bg-green-500' : 
+                                  item.smsStatus === 'Sent' ? 'bg-blue-500' : 'bg-yellow-500'
+                                }`}></span>
+                                <span className={`text-xs font-medium ${
+                                  item.smsStatus === 'Delivered' ? 'text-green-600' : 
+                                  item.smsStatus === 'Sent' ? 'text-blue-600' : 'text-yellow-600'
+                                }`}>
+                                  {item.smsStatus}
+                                </span>
+                                <span className="ml-2 text-gray-400 text-xs">{item.sendTime}</span>
+                              </div>
+                            </div>
+                          )}
+
+                          {item.verifiedTime && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Verified:</span>
+                              <span className="text-xs font-medium text-green-600">{item.verifiedTime}</span>
+                            </div>
+                          )}
+
+                          {item.consultDate && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Consult:</span>
+                              <span className="text-xs font-medium text-gray-700">{item.consultDate}</span>
+                            </div>
+                          )}
+
+                          {item.financing && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Financing:</span>
+                              <span className="text-xs font-medium text-gray-700">{item.financing}</span>
+                            </div>
+                          )}
+
+                          {item.reason && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Issue:</span>
+                              <span className="text-xs font-medium text-red-600">{item.reason}</span>
+                            </div>
+                          )}
+
+                          {item.notes && (
+                            <div className="flex items-center">
+                              <span className="inline-block w-20 text-xs text-gray-500 truncate">Note:</span>
+                              <span className="text-xs font-medium text-gray-600">{item.notes}</span>
+                            </div>
+                          )}
+                        </div>
+
+                      <div className="flex flex-wrap gap-1.5 my-2">
+                        {item.tags && item.tags.map((tag, index) => {
+                          if (index === 0) {
+                            return (
+                              <span 
+                                key={index} 
+                                className={`text-xs px-2 py-0.5 rounded ${getServiceColor(tag)}`}
+                              >
+                                {tag}
+                              </span>
+                            );
+                          } else {
+                            return (
+                              <span 
+                                key={index} 
+                                className={`text-xs px-2 py-0.5 rounded ${getProcedureColor(tag)}`}
+                              >
+                                {tag}
+                              </span>
+                            );
+                          }
+                        })}
+                      </div>
+
+                      <div className="pt-2 border-t border-gray-100 flex justify-end">
+                        <div className="flex items-center text-xs text-gray-500">
+                          <span>{item.time}</span>
+                          <Phone className="h-3.5 w-3.5 ml-2 text-gray-400" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AestheticsMedicalLeadDashboard;
