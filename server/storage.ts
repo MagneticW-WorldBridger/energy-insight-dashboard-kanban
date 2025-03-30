@@ -2,6 +2,7 @@ import {
   leads, 
   columns, 
   stats, 
+  users,
   type Lead, 
   type Column, 
   type Stats, 
@@ -11,10 +12,12 @@ import {
   type User,
   type InsertUser
 } from "@shared/schema";
+import { db } from "./db";
+import { eq, desc, sql, and, asc } from "drizzle-orm";
 
 // Storage interface
 export interface IStorage {
-  // User methods (from the original template)
+  // User methods
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
@@ -37,254 +40,227 @@ export interface IStorage {
   // Stats methods
   getStats(): Promise<Stats>;
   updateStats(stats: InsertStats): Promise<Stats>;
+
+  // Webhook method
+  processWebhook(webhookData: any): Promise<Lead>;
 }
 
-// Implement the in-memory storage
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private leadsData: Map<number, Lead>;
-  private columnsData: Map<string, Column>;
-  private statsData: Stats;
-  currentUserId: number;
-  currentLeadId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.leadsData = new Map();
-    this.columnsData = new Map();
-    this.currentUserId = 1;
-    this.currentLeadId = 1;
-    
-    // Initialize with sample data
-    this.initializeData();
-  }
-  
-  private initializeData() {
-    // Initialize columns
-    const initialColumns: Column[] = [
-      { id: 'newLeads', title: 'New Leads', order: 1 },
-      { id: 'pendingSMS', title: 'SMS Sent', order: 2 },
-      { id: 'verified', title: 'Identity Verified', order: 3 },
-      { id: 'qualified', title: 'Consultation Ready', order: 4 },
-      { id: 'failed', title: 'Failed Verification', order: 5 }
-    ];
-    
-    initialColumns.forEach(column => {
-      this.columnsData.set(column.id, column);
-    });
-    
-    // Initialize sample leads
-    const sampleLeads: Lead[] = [
-      { 
-        id: this.currentLeadId++, 
-        name: 'Sarah Johnson', 
-        username: '@sarahj', 
-        time: '5m ago', 
-        source: 'Botox Story Ad', 
-        avatar: '/api/placeholder/40/40', 
-        tags: ['Injectables', 'Botox/Daxxify'],
-        assessment: "Pending",
-        columnId: 'newLeads',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      { 
-        id: this.currentLeadId++, 
-        name: 'James Wilson', 
-        username: '@jamwilson', 
-        time: '1h ago', 
-        source: 'Aveli Cellulite Post', 
-        avatar: '/api/placeholder/40/40', 
-        tags: ['Aesthetics', 'Aveli Treatment'], 
-        smsStatus: 'Delivered', 
-        sendTime: '10:22 AM',
-        assessment: "Pending",
-        columnId: 'pendingSMS',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      { 
-        id: this.currentLeadId++, 
-        name: 'Robert Brown', 
-        username: '@robbrown', 
-        time: '4h ago', 
-        source: 'Male HD Lipo Ad', 
-        avatar: '/api/placeholder/40/40', 
-        tags: ['Body', 'HD VASER Lipo'], 
-        verifiedTime: '11:32 AM', 
-        score: 85,
-        assessment: {
-          likelihood: 6.2,
-          benefits: 5.8,
-          overall: "High Intent"
-        },
-        columnId: 'verified',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      { 
-        id: this.currentLeadId++, 
-        name: 'Daniel Martinez', 
-        username: '@daniel_m', 
-        time: '1d ago', 
-        source: 'BBL Post Engagement', 
-        avatar: '/api/placeholder/40/40', 
-        tags: ['Butt', 'HD BBL'], 
-        qualScore: 95, 
-        priority: 'High Intent', 
-        consultDate: 'Mar 21',
-        assessment: {
-          likelihood: 6.8,
-          benefits: 6.5,
-          overall: "High Intent"
-        },
-        financing: "Care Credit",
-        columnId: 'qualified',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      },
-      { 
-        id: this.currentLeadId++, 
-        name: 'Taylor Smith', 
-        username: '@taylors', 
-        time: '1d ago', 
-        source: 'Profile Visit', 
-        avatar: '/api/placeholder/40/40', 
-        reason: 'SMS undeliverable',
-        assessment: "Incomplete",
-        columnId: 'failed',
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }
-    ];
-    
-    sampleLeads.forEach(lead => {
-      this.leadsData.set(lead.id, lead);
-    });
-    
-    // Initialize stats
-    this.statsData = {
-      id: 1,
-      totalLeads: 100,
-      newLeadsToday: 32,
-      consultsBooked: 18,
-      smsResponseRate: 67,
-      updatedAt: new Date()
-    };
-  }
-
-  // User methods (from original template)
+// Implement PostgreSQL database storage
+export class DatabaseStorage implements IStorage {
+  // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user || undefined;
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const [user] = await db.select().from(users)
+      .where(eq(users.email, username)); // Note: Using email as username
+    return user || undefined;
   }
 
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+  async createUser(user: InsertUser): Promise<User> {
+    const [newUser] = await db.insert(users).values(user).returning();
+    return newUser;
   }
   
   // Lead methods
   async getLead(id: number): Promise<Lead | undefined> {
-    return this.leadsData.get(id);
+    const [lead] = await db.select().from(leads).where(eq(leads.id, id));
+    return lead || undefined;
   }
   
   async getLeads(): Promise<Lead[]> {
-    return Array.from(this.leadsData.values());
+    return await db.select().from(leads).orderBy(desc(leads.time));
   }
   
   async getLeadsByColumn(columnId: string): Promise<Lead[]> {
-    return Array.from(this.leadsData.values()).filter(lead => lead.columnId === columnId);
+    return await db.select().from(leads)
+      .where(eq(leads.columnId, columnId))
+      .orderBy(desc(leads.time));
   }
   
   async createLead(lead: InsertLead): Promise<Lead> {
-    const id = this.currentLeadId++;
-    const newLead: Lead = {
-      ...lead,
-      id,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    };
-    this.leadsData.set(id, newLead);
+    const [newLead] = await db.insert(leads).values(lead).returning();
     return newLead;
   }
   
-  async updateLead(id: number, lead: Partial<InsertLead>): Promise<Lead | undefined> {
-    const existingLead = this.leadsData.get(id);
+  async updateLead(id: number, updateData: Partial<InsertLead>): Promise<Lead | undefined> {
+    const [updatedLead] = await db.update(leads)
+      .set(updateData)
+      .where(eq(leads.id, id))
+      .returning();
     
-    if (!existingLead) {
-      return undefined;
-    }
-    
-    const updatedLead: Lead = {
-      ...existingLead,
-      ...lead,
-      updatedAt: new Date()
-    };
-    
-    this.leadsData.set(id, updatedLead);
-    return updatedLead;
+    return updatedLead || undefined;
   }
   
   async deleteLead(id: number): Promise<boolean> {
-    return this.leadsData.delete(id);
+    const result = await db.delete(leads).where(eq(leads.id, id));
+    // Handle case when rowCount might be null
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Column methods
   async getColumn(id: string): Promise<Column | undefined> {
-    return this.columnsData.get(id);
+    const [column] = await db.select().from(columns).where(eq(columns.id, id));
+    return column || undefined;
   }
   
   async getColumns(): Promise<Column[]> {
-    return Array.from(this.columnsData.values()).sort((a, b) => a.order - b.order);
+    return await db.select().from(columns).orderBy(asc(columns.order));
   }
   
   async createColumn(column: InsertColumn): Promise<Column> {
-    this.columnsData.set(column.id, column);
-    return column;
+    const [newColumn] = await db.insert(columns).values(column).returning();
+    return newColumn;
   }
   
-  async updateColumn(id: string, column: Partial<InsertColumn>): Promise<Column | undefined> {
-    const existingColumn = this.columnsData.get(id);
+  async updateColumn(id: string, updateData: Partial<InsertColumn>): Promise<Column | undefined> {
+    const [updatedColumn] = await db.update(columns)
+      .set(updateData)
+      .where(eq(columns.id, id))
+      .returning();
     
-    if (!existingColumn) {
-      return undefined;
-    }
-    
-    const updatedColumn: Column = {
-      ...existingColumn,
-      ...column
-    };
-    
-    this.columnsData.set(id, updatedColumn);
-    return updatedColumn;
+    return updatedColumn || undefined;
   }
   
   async deleteColumn(id: string): Promise<boolean> {
-    return this.columnsData.delete(id);
+    const result = await db.delete(columns).where(eq(columns.id, id));
+    // Handle case when rowCount might be null
+    return result.rowCount ? result.rowCount > 0 : false;
   }
   
   // Stats methods
   async getStats(): Promise<Stats> {
-    return this.statsData;
+    const [existingStats] = await db.select().from(stats);
+    
+    if (existingStats) {
+      return existingStats;
+    }
+    
+    // Create default stats if none exist
+    const defaultStats: InsertStats = {
+      totalLeads: 0,
+      newLeadsToday: 0,
+      consultsBooked: 0,
+      smsResponseRate: 0
+    };
+    
+    const [newStats] = await db.insert(stats).values(defaultStats).returning();
+    return newStats;
   }
   
   async updateStats(newStats: InsertStats): Promise<Stats> {
-    this.statsData = {
-      ...this.statsData,
-      ...newStats,
-      updatedAt: new Date()
+    const [existingStats] = await db.select().from(stats);
+    
+    if (existingStats) {
+      const [updatedStats] = await db.update(stats)
+        .set(newStats)
+        .where(eq(stats.id, existingStats.id))
+        .returning();
+      
+      return updatedStats;
+    } else {
+      const [createdStats] = await db.insert(stats).values(newStats).returning();
+      return createdStats;
+    }
+  }
+
+  // Webhook handler
+  async processWebhook(webhookData: any): Promise<Lead> {
+    // Default to 'newLeads' column if not specified
+    const columnId = webhookData.columnId || 'newLeads';
+    
+    // Process incoming webhook data to match our Lead schema
+    const leadData: InsertLead = {
+      name: webhookData.name || 'Unknown',
+      username: webhookData.username || `@unknown_${Date.now()}`,
+      time: webhookData.time ? new Date(webhookData.time) : new Date(),
+      tags: webhookData.tags || [],
+      avatar: webhookData.avatar || null,
+      assessment: webhookData.assessment || 'Pending',
+      columnId: columnId,
+      // Additional fields
+      smsStatus: webhookData.smsStatus,
+      sendTime: webhookData.sendTime,
+      verifiedTime: webhookData.verifiedTime,
+      score: webhookData.score,
+      qualScore: webhookData.qualScore,
+      priority: webhookData.priority,
+      consultDate: webhookData.consultDate,
+      financing: webhookData.financing,
+      reason: webhookData.reason,
+      notes: webhookData.notes,
+      questionnaire: webhookData.questionnaire,
+      demographic: webhookData.demographic,
+      contactInfo: webhookData.contactInfo,
+      qualificationAnswers: webhookData.qualificationAnswers,
+      consultation: webhookData.consultation,
+      messageHistory: webhookData.messageHistory,
+      qualificationScore: webhookData.qualificationScore || 0,
+      followUpDate: webhookData.followUpDate,
+      callScheduled: webhookData.callScheduled || false,
+      callNotes: webhookData.callNotes,
     };
     
-    return this.statsData;
+    // Create new lead in database
+    const [newLead] = await db.insert(leads).values(leadData).returning();
+    
+    // Update stats
+    await this.updateLeadStats();
+    
+    return newLead;
+  }
+  
+  // Helper method to update stats based on current leads
+  private async updateLeadStats(): Promise<void> {
+    // Count total leads
+    const [totalResult] = await db.select({ count: sql`count(*)` }).from(leads);
+    const totalLeads = Number(totalResult?.count || 0);
+    
+    // Count new leads created today
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const [newLeadsResult] = await db.select({ count: sql`count(*)` })
+      .from(leads)
+      .where(sql`time >= ${today.toISOString()}`);
+    const newLeadsToday = Number(newLeadsResult?.count || 0);
+    
+    // Count consults booked
+    const [consultsResult] = await db.select({ count: sql`count(*)` })
+      .from(leads)
+      .where(and(
+        sql`consult_date IS NOT NULL`,
+        sql`column_id = 'qualified'`
+      ));
+    const consultsBooked = Number(consultsResult?.count || 0);
+    
+    // Calculate SMS response rate (simplified)
+    // This is a placeholder calculation - you might need to adjust based on your specific SMS response tracking
+    const [smsDeliveredResult] = await db.select({ count: sql`count(*)` })
+      .from(leads)
+      .where(eq(leads.smsStatus, 'Delivered'));
+    const smsDelivered = Number(smsDeliveredResult?.count || 0);
+    
+    const [smsRespondedResult] = await db.select({ count: sql`count(*)` })
+      .from(leads)
+      .where(and(
+        eq(leads.smsStatus, 'Delivered'),
+        sql`column_id IN ('verified', 'qualified')`
+      ));
+    const smsResponded = Number(smsRespondedResult?.count || 0);
+    
+    const smsResponseRate = smsDelivered > 0 ? Math.round((smsResponded / smsDelivered) * 100) : 0;
+    
+    // Update stats
+    await this.updateStats({
+      totalLeads,
+      newLeadsToday,
+      consultsBooked,
+      smsResponseRate
+    });
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
