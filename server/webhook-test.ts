@@ -75,7 +75,7 @@ function testWebhook() {
         const parsedData = JSON.parse(responseData);
         console.log('Response data:', JSON.stringify(parsedData, null, 2));
         
-        if (res.statusCode >= 200 && res.statusCode < 300) {
+        if (res.statusCode && res.statusCode >= 200 && res.statusCode < 300) {
           console.log('✅ Webhook test successful!');
         } else {
           console.error('❌ Webhook test failed!');

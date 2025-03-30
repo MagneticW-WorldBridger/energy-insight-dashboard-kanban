@@ -3,6 +3,7 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
 import { insertLeadSchema, insertColumnSchema } from "@shared/schema";
+import { analyzeQuestionnaire, type QuestionnaireResponses } from "./openai-service";
 
 // For webhook authentication
 const apiKeySchema = z.object({
@@ -103,7 +104,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Extract email and phone if they exist in the request body
-      const { email, phone, ...restOfBody } = req.body;
+      const { email, phone, questionnaire, ...restOfBody } = req.body;
       
       // Prepare the data to update
       const updateData: any = { ...restOfBody };
@@ -133,6 +134,41 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // Add contactInfo to update data
         updateData.contactInfo = JSON.stringify(updatedContactInfo);
+      }
+      
+      // Check if questionnaire is provided and analyze it with OpenAI if complete
+      if (questionnaire) {
+        console.log('Received questionnaire update:', JSON.stringify(questionnaire));
+        updateData.questionnaire = questionnaire;
+        
+        // Extract the questionnaire data from the request or existing lead
+        const questionnaireData = questionnaire as QuestionnaireResponses;
+        
+        // Count how many questions are answered
+        const answeredQuestions = Object.values(questionnaireData).filter(Boolean).length;
+        console.log(`Questionnaire has ${answeredQuestions}/15 questions answered`);
+        
+        // If all 15 questions are answered, analyze with OpenAI
+        if (answeredQuestions === 15) {
+          try {
+            console.log('Analyzing complete questionnaire with OpenAI...');
+            const assessmentResult = await analyzeQuestionnaire(questionnaireData);
+            
+            if (assessmentResult) {
+              console.log('OpenAI assessment result:', JSON.stringify(assessmentResult));
+              updateData.assessment = JSON.stringify(assessmentResult);
+            } else {
+              console.log('OpenAI analysis failed or returned null');
+              updateData.assessment = "Incomplete";
+            }
+          } catch (error) {
+            console.error('Error analyzing questionnaire:', error);
+            updateData.assessment = "Incomplete";
+          }
+        } else {
+          // Not all questions are answered yet
+          updateData.assessment = "Incomplete";
+        }
       }
       
       // Update the lead
@@ -265,6 +301,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error fetching stats:', error);
       res.status(500).json({ message: 'Error fetching stats' });
+    }
+  });
+  
+  // Update a lead's column (for drag and drop functionality)
+  app.patch('/api/leads/:id/column', async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { columnId } = req.body;
+      
+      if (!columnId) {
+        return res.status(400).json({ message: 'columnId is required' });
+      }
+      
+      // First check if the lead exists
+      const lead = await storage.getLead(parseInt(id));
+      if (!lead) {
+        return res.status(404).json({ message: 'Lead not found' });
+      }
+      
+      // Check if the column exists
+      const column = await storage.getColumn(columnId);
+      if (!column) {
+        return res.status(404).json({ message: 'Column not found' });
+      }
+      
+      // Update the lead's column
+      const updatedLead = await storage.updateLead(parseInt(id), { columnId });
+      
+      if (!updatedLead) {
+        return res.status(500).json({ message: 'Failed to update lead' });
+      }
+      
+      res.json({
+        id: updatedLead.id,
+        message: 'Lead column updated successfully',
+        lead: updatedLead
+      });
+    } catch (error) {
+      console.error('Error updating lead column:', error);
+      res.status(400).json({ message: 'Invalid request', error });
     }
   });
 

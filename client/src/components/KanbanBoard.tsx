@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import LeadColumn from './LeadColumn';
-import { LeadColumn as LeadColumnType } from '@/types/leads';
+import { LeadColumn as LeadColumnType, Lead } from '@/types/leads';
 import { useLeads } from '@/context/LeadContext';
+import { toast } from '@/hooks/use-toast';
 
 interface KanbanBoardProps {
   columns: {
@@ -11,7 +12,75 @@ interface KanbanBoardProps {
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
   const { searchTerm, filters } = useLeads();
+  const [draggedLeadId, setDraggedLeadId] = useState<number | null>(null);
+  const [isDragging, setIsDragging] = useState(false);
 
+  // Reset dragging state when component unmounts
+  useEffect(() => {
+    return () => {
+      setIsDragging(false);
+      setDraggedLeadId(null);
+    };
+  }, []);
+
+  // Handle drag start
+  const handleDragStart = (leadId: number) => {
+    setDraggedLeadId(leadId);
+    setIsDragging(true);
+  };
+
+  // Handle drop on a column
+  const handleDrop = async (columnId: number) => {
+    if (!draggedLeadId || !isDragging) return;
+    
+    try {
+      // Find the lead being dragged
+      let draggedLead: Lead | undefined;
+      let originalColumnId: string | undefined;
+      
+      // Search through all columns to find the dragged lead
+      for (const colKey in columns) {
+        const found = columns[colKey].items.find(lead => lead.id === draggedLeadId);
+        if (found) {
+          draggedLead = found;
+          originalColumnId = colKey;
+          break;
+        }
+      }
+      
+      if (!draggedLead || !originalColumnId || originalColumnId === columnId.toString()) {
+        setIsDragging(false);
+        setDraggedLeadId(null);
+        return;
+      }
+      
+      // Make API request to update the lead's column
+      await fetch(`/api/leads/${draggedLeadId}/column`, {
+        method: 'PATCH',
+        body: JSON.stringify({ columnId: columnId.toString() }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      toast({
+        title: 'Lead moved',
+        description: `${draggedLead.name} moved to ${columns[columnId.toString()].title}`,
+      });
+      
+    } catch (error) {
+      console.error('Error moving lead:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to move lead. Please try again.',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsDragging(false);
+      setDraggedLeadId(null);
+    }
+  };
+  
   // Filter leads based on search term and filter options
   const filteredColumns = Object.entries(columns).reduce<Record<string, LeadColumnType>>((acc, [key, column]) => {
     let filteredItems = column.items;
@@ -58,10 +127,18 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
   }, {});
 
   return (
-    <div className="flex-1 overflow-x-auto scrollbar-hide" style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}>
+    <div 
+      className="flex-1 overflow-x-auto scrollbar-hide" 
+      style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+    >
       <div className="inline-flex h-full p-4 space-x-4">
-        {Object.values(filteredColumns).map((column: any) => (
-          <LeadColumn key={column.id} column={column} />
+        {Object.values(filteredColumns).map((column) => (
+          <LeadColumn 
+            key={column.id} 
+            column={column} 
+            onDragStart={handleDragStart}
+            onDrop={handleDrop}
+          />
         ))}
       </div>
     </div>
