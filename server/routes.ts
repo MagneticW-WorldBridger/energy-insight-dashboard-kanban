@@ -23,19 +23,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create a new lead
+  // Create a new lead (minimal version - only requires name)
   app.post('/api/leads', async (req, res) => {
     try {
-      const validatedData = insertLeadSchema.parse(req.body);
-      const lead = await storage.createLead(validatedData);
-      res.status(201).json(lead);
+      // Custom minimal validation schema for creating leads
+      const minimalLeadSchema = z.object({
+        name: z.string().min(1, "Name is required"),
+        // Optional fields
+        phone: z.string().optional(),
+        email: z.string().email().optional(),
+        // Any other fields are optional
+      }).passthrough(); // Allow other fields to pass through
+
+      const validatedData = minimalLeadSchema.parse(req.body);
+      
+      // Extract phone and email before creating the lead object
+      const { phone, email, ...otherData } = validatedData;
+      
+      // Set default values for a new lead
+      const leadData: any = {
+        ...otherData,
+        username: `@${validatedData.name.toLowerCase().replace(/\s+/g, '_')}`,
+        time: new Date(), // Use Date object, not string
+        tags: validatedData.tags || [],
+        assessment: "Pending",
+        columnId: "newLeads",
+      };
+      
+      // If phone/email was provided, create contactInfo object
+      if (phone || email) {
+        leadData.contactInfo = JSON.stringify({
+          phone,
+          email
+        });
+      }
+      
+      const lead = await storage.createLead(leadData);
+      
+      // Return the lead ID (contactID) and basic info
+      res.status(201).json({
+        id: lead.id,
+        name: lead.name,
+        contactInfo: lead.contactInfo,
+        message: 'Lead created successfully'
+      });
     } catch (error) {
       console.error('Error creating lead:', error);
       res.status(400).json({ message: 'Invalid lead data', error });
     }
   });
 
-  // Update a lead
+  // Update a lead with PATCH (partial update)
   app.patch('/api/leads/:id', async (req, res) => {
     try {
       const { id } = req.params;
@@ -47,6 +85,68 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       res.json(updatedLead);
+    } catch (error) {
+      console.error('Error updating lead:', error);
+      res.status(400).json({ message: 'Invalid lead data', error });
+    }
+  });
+  
+  // Update a lead with PUT (complete update)
+  app.put('/api/leads/:id', async (req, res) => {
+    try {
+      const { id } = req.params;
+      
+      // First check if the lead exists
+      const existingLead = await storage.getLead(parseInt(id));
+      if (!existingLead) {
+        return res.status(404).json({ message: 'Lead not found' });
+      }
+      
+      // Extract email and phone if they exist in the request body
+      const { email, phone, ...restOfBody } = req.body;
+      
+      // Prepare the data to update
+      const updateData: any = { ...restOfBody };
+      
+      // If email or phone is provided, update the contactInfo
+      if (email || phone) {
+        // Parse existing contactInfo if it exists
+        let existingContactInfo = {};
+        if (existingLead.contactInfo) {
+          try {
+            if (typeof existingLead.contactInfo === 'string') {
+              existingContactInfo = JSON.parse(existingLead.contactInfo);
+            } else {
+              existingContactInfo = existingLead.contactInfo;
+            }
+          } catch (e) {
+            console.error('Error parsing contactInfo:', e);
+          }
+        }
+        
+        // Create updated contactInfo
+        const updatedContactInfo = {
+          ...existingContactInfo,
+          ...(email ? { email } : {}),
+          ...(phone ? { phone } : {})
+        };
+        
+        // Add contactInfo to update data
+        updateData.contactInfo = JSON.stringify(updatedContactInfo);
+      }
+      
+      // Update the lead
+      const updatedLead = await storage.updateLead(parseInt(id), updateData);
+      
+      if (!updatedLead) {
+        return res.status(500).json({ message: 'Failed to update lead' });
+      }
+      
+      res.json({
+        id: updatedLead.id,
+        message: 'Lead updated successfully',
+        lead: updatedLead
+      });
     } catch (error) {
       console.error('Error updating lead:', error);
       res.status(400).json({ message: 'Invalid lead data', error });

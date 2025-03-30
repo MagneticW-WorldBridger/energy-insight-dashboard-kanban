@@ -7,7 +7,8 @@
  * npx tsx server/webhook-test.ts
  */
 
-import fetch from 'node-fetch';
+import { request } from 'http';
+import { URL } from 'url';
 
 // Default webhook URL (change this if your server runs on a different URL)
 const WEBHOOK_URL = 'http://localhost:5000/api/webhook/leads';
@@ -41,33 +42,57 @@ const sampleWebhookData = {
   }
 };
 
-async function testWebhook() {
+function testWebhook() {
   console.log('Testing webhook endpoint...');
   console.log(`Sending POST request to: ${WEBHOOK_URL}`);
   
-  try {
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-API-Key': process.env.WEBHOOK_API_KEY || 'test-api-key' // In development mode, API key check is bypassed
-      },
-      body: JSON.stringify(sampleWebhookData)
+  const url = new URL(WEBHOOK_URL);
+  const data = JSON.stringify(sampleWebhookData);
+  
+  const options = {
+    hostname: url.hostname,
+    port: url.port || 80,
+    path: url.pathname,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': data.length,
+      'X-API-Key': process.env.WEBHOOK_API_KEY || 'test-api-key' // In development mode, API key check is bypassed
+    }
+  };
+  
+  const req = request(options, (res) => {
+    let responseData = '';
+    
+    console.log(`Response status: ${res.statusCode}`);
+    
+    res.on('data', (chunk) => {
+      responseData += chunk;
     });
     
-    const responseData = await response.json();
-    
-    console.log(`Response status: ${response.status}`);
-    console.log('Response data:', JSON.stringify(responseData, null, 2));
-    
-    if (response.ok) {
-      console.log('✅ Webhook test successful!');
-    } else {
-      console.error('❌ Webhook test failed!');
-    }
-  } catch (error) {
+    res.on('end', () => {
+      try {
+        const parsedData = JSON.parse(responseData);
+        console.log('Response data:', JSON.stringify(parsedData, null, 2));
+        
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          console.log('✅ Webhook test successful!');
+        } else {
+          console.error('❌ Webhook test failed!');
+        }
+      } catch (e) {
+        console.error('Error parsing response:', e);
+        console.log('Raw response:', responseData);
+      }
+    });
+  });
+  
+  req.on('error', (error) => {
     console.error('Error testing webhook:', error);
-  }
+  });
+  
+  req.write(data);
+  req.end();
 }
 
 // Execute the test
