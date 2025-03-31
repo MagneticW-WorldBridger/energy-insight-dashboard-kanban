@@ -15,6 +15,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
   const { searchTerm, filters } = useLeads();
   const [draggedLeadId, setDraggedLeadId] = useState<number | null>(null);
   const [isDragging, setIsDragging] = useState(false);
+  const [localColumns, setLocalColumns] = useState(columns);
 
   // Reset dragging state when component unmounts
   useEffect(() => {
@@ -23,6 +24,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       setDraggedLeadId(null);
     };
   }, []);
+  
+  // Update local columns when external columns change
+  useEffect(() => {
+    setLocalColumns(columns);
+  }, [columns]);
 
   // Handle drag start
   const handleDragStart = (leadId: number) => {
@@ -93,6 +99,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       const result = await response.json();
       console.log('API response:', result);
       
+      // Immediately update UI by modifying local state
+      const updatedColumns = {...localColumns};
+      
+      // Remove the lead from its original column
+      updatedColumns[originalColumnId].items = updatedColumns[originalColumnId].items.filter(
+        item => item.id !== draggedLeadId
+      );
+      
+      // Add the lead to the new column
+      updatedColumns[columnId].items.push({
+        ...draggedLead,
+        columnId: columnId // Update the lead's column ID
+      });
+      
+      // Update counts
+      updatedColumns[originalColumnId].count = updatedColumns[originalColumnId].items.length;
+      updatedColumns[columnId].count = updatedColumns[columnId].items.length;
+      
+      // Update the local state
+      setLocalColumns(updatedColumns);
+      
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/columns'] });
@@ -113,10 +140,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       setIsDragging(false);
       setDraggedLeadId(null);
     }
-  }, [draggedLeadId, isDragging, columns]);
+  }, [draggedLeadId, isDragging, columns, localColumns]);
   
   // Filter leads based on search term and filter options
-  const filteredColumns = Object.entries(columns).reduce<Record<string, LeadColumnType>>((acc, [key, column]) => {
+  const filteredColumns = Object.entries(localColumns).reduce<Record<string, LeadColumnType>>((acc, [key, column]) => {
     let filteredItems = column.items;
     
     // Apply search term filter
