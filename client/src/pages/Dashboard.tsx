@@ -4,9 +4,15 @@ import StatsBar from '@/components/StatsBar';
 import FilterBar from '@/components/FilterBar';
 import KanbanBoard from '@/components/KanbanBoard';
 import { useLeads } from '@/context/LeadContext';
+import { Loader2 } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
-  const { leadState } = useLeads();
+  const { leadState, isLoading, reloadLeads } = useLeads();
+
+  // Cargar datos al inicio
+  useEffect(() => {
+    reloadLeads();
+  }, []);
 
   // Set the correct column heights on load and resize
   useEffect(() => {
@@ -41,6 +47,20 @@ const Dashboard: React.FC = () => {
       window.removeEventListener('resize', setColumnHeight);
     };
   }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex flex-col h-screen">
+        <Header />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="flex flex-col items-center space-y-4">
+            <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
+            <p className="text-lg text-gray-700">Cargando datos del panel...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen">
