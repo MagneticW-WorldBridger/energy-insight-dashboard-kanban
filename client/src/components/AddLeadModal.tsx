@@ -43,7 +43,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    
+
     if (name === 'email' || name === 'phone') {
       setFormData(prev => ({
         ...prev,
@@ -59,7 +59,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
       }));
     }
   };
-  
+
   const handleSelectChange = (name: string) => (value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -70,7 +70,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       // Prepare data to send
       const leadData = {
@@ -81,7 +81,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
         priority: formData.priority === 'none' ? '' : formData.priority,
         financing: formData.financing === 'none' ? '' : formData.financing
       };
-      
+
       // Make POST request
       const response = await fetch('/api/leads', {
         method: 'POST',
@@ -90,24 +90,24 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
         },
         body: JSON.stringify(leadData)
       });
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         throw new Error(`Error creating lead: ${errorText}`);
       }
-      
+
       const result = await response.json();
-      
+
       // Show success notification
       toast({
         title: 'Lead Created',
         description: `${formData.name} has been added successfully`
       });
-      
+
       // Reload data and close modal
       reloadLeads();
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-      
+
       // Clear form
       setFormData({
         name: '',
@@ -131,7 +131,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
           phone: ''
         }
       });
-      
+
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating lead:', error);
@@ -160,14 +160,14 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             <X className="h-4 w-4" />
           </Button>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Basic Information Section */}
             <div className="md:col-span-2">
               <h3 className="text-lg font-medium mb-2 border-b pb-1">Basic Information</h3>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="name">Full Name *</Label>
               <Input 
@@ -179,7 +179,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 required 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="username">Username</Label>
               <Input 
@@ -190,7 +190,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="@username" 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="time">Time</Label>
               <Input 
@@ -201,7 +201,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="5m ago, 2h ago, etc." 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="source">Source</Label>
               <Input 
@@ -212,7 +212,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="Facebook, Instagram, etc." 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="tags">Tags (comma separated)</Label>
               <Input 
@@ -223,7 +223,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="Botox, Fillers, Face, etc." 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="avatar">Avatar URL (optional)</Label>
               <Input 
@@ -234,12 +234,12 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="https://example.com/avatar.jpg" 
               />
             </div>
-            
+
             {/* Contact Information Section */}
             <div className="md:col-span-2 mt-2">
               <h3 className="text-lg font-medium mb-2 border-b pb-1">Contact Information</h3>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input 
@@ -251,7 +251,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="email@example.com" 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="phone">Phone</Label>
               <Input 
@@ -262,12 +262,12 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="+1 (555) 123-4567" 
               />
             </div>
-            
+
             {/* Status and Progress Section */}
             <div className="md:col-span-2 mt-2">
               <h3 className="text-lg font-medium mb-2 border-b pb-1">Status and Progress</h3>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="columnId">Column (Status)</Label>
               <Select name="columnId" value={formData.columnId} onValueChange={handleSelectChange('columnId')}>
@@ -285,7 +285,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="smsStatus">SMS Status</Label>
               <Select name="smsStatus" value={formData.smsStatus} onValueChange={handleSelectChange('smsStatus')}>
@@ -300,7 +300,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="sendTime">SMS Send Time</Label>
               <Input 
@@ -311,7 +311,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="10:30 AM" 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="verifiedTime">Verification Time</Label>
               <Input 
@@ -322,7 +322,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="11:45 AM" 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="priority">Priority</Label>
               <Select name="priority" value={formData.priority} onValueChange={handleSelectChange('priority')}>
@@ -337,7 +337,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="consultDate">Consultation Date</Label>
               <Input 
@@ -348,7 +348,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="Mar 15, 2023" 
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="financing">Financing</Label>
               <Select name="financing" value={formData.financing} onValueChange={handleSelectChange('financing')}>
@@ -364,7 +364,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="reason">Reason (if applicable)</Label>
               <Input 
@@ -375,7 +375,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 placeholder="Reason for not proceeding, cancellation, etc." 
               />
             </div>
-            
+
             <div className="space-y-2 md:col-span-2">
               <Label htmlFor="notes">Notes</Label>
               <Textarea 
@@ -388,7 +388,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               />
             </div>
           </div>
-          
+
           <DialogFooter>
             <Button 
               variant="outline" 
