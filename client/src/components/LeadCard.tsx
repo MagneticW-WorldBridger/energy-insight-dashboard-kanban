@@ -105,10 +105,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
   return (
     <>
       <div 
-        className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden cursor-grab active:cursor-grabbing hover:shadow transition-shadow duration-200"
-        draggable="true"
-        onDragStart={handleDragStart}
-        onDragEnd={handleDragEnd}
+        className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden hover:shadow transition-shadow duration-200"
         data-lead-id={lead.id}
       >
         <div className="p-3">

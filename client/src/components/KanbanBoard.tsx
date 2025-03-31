@@ -1,6 +1,7 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import LeadColumn from './LeadColumn';
+import LeadCard from './LeadCard';
 import { LeadColumn as LeadColumnType } from '@/types/leads';
 import { useLeads } from '@/context/LeadContext';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -241,27 +242,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
                                 ...provided.draggableProps.style,
                               }}
                             >
-                              <div className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden p-4">
-                                <div className="flex items-center justify-between mb-2">
-                                  <div className="flex items-center">
-                                    <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center text-amber-800 font-medium text-sm mr-2">
-                                      {lead.name.split(' ').map(n => n[0]).join('').toUpperCase()}
-                                    </div>
-                                    <div>
-                                      <h3 className="font-medium text-gray-900">{lead.name}</h3>
-                                      <div className="text-xs text-gray-500">{lead.username}</div>
-                                    </div>
-                                  </div>
-                                  <span className="text-xs text-gray-500">{lead.time}</span>
-                                </div>
-                                <div className="flex flex-wrap gap-1.5 mt-2">
-                                  {lead.tags && lead.tags.map((tag, i) => (
-                                    <span key={i} className="px-2 py-0.5 bg-gray-100 text-xs rounded-full">
-                                      {tag}
-                                    </span>
-                                  ))}
-                                </div>
-                              </div>
+                              <LeadCard lead={lead} />
                             </div>
                           )}
                         </Draggable>
