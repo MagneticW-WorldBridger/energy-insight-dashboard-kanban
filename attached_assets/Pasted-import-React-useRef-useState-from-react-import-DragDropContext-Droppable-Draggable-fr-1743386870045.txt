@@ -1,0 +1,151 @@
+import React, { useRef, useState } from 'react';
+import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
+import LeadColumn from './LeadColumn';
+import { LeadColumn as LeadColumnType } from '@/types/leads';
+import { useLeads } from '@/context/LeadContext';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+
+interface KanbanBoardProps {
+  columns: {
+    [key: string]: LeadColumnType;
+  };
+}
+
+const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
+  const { searchTerm, filters, updateLeadColumn } = useLeads();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const [showScrollButtons, setShowScrollButtons] = useState(true);
+
+  // Filter leads based on search term and filter options
+  const filteredColumns = Object.entries(columns).reduce<Record<string, LeadColumnType>>((acc, [key, column]) => {
+    let filteredItems = column.items;
+    
+    // Apply search term filter
+    if (searchTerm) {
+      filteredItems = filteredItems.filter(item => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        item.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (item.source && item.source.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (Array.isArray(item.tags) && item.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
+      );
+    }
+    
+    // Apply other filters
+    if (filters.dateRange && filters.dateRange !== 'all') {
+      if (filters.dateRange === 'Last 7 Days') {
+        // Simple simulation - in a real app, would compare actual dates
+        filteredItems = filteredItems.filter(item => 
+          !item.time.includes('d ago') || item.time.includes('1d ago')
+        );
+      }
+    }
+    
+    if (filters.leadSource && filters.leadSource !== 'all' && filters.leadSource !== 'All Sources') {
+      filteredItems = filteredItems.filter(item => 
+        item.source && item.source.includes(filters.leadSource || '')
+      );
+    }
+    
+    if (filters.procedure && filters.procedure !== 'all' && filters.procedure !== 'All Procedures') {
+      filteredItems = filteredItems.filter(item => 
+        Array.isArray(item.tags) && item.tags.some(tag => tag.includes(filters.procedure || ''))
+      );
+    }
+    
+    acc[key] = {
+      ...column,
+      items: filteredItems,
+      count: filteredItems.length
+    };
+    
+    return acc;
+  }, {});
+
+  const handleScroll = (direction: 'left' | 'right') => {
+    if (!scrollContainerRef.current) return;
+    
+    const scrollAmount = direction === 'left' ? -350 : 350;
+    scrollContainerRef.current.scrollBy({
+      left: scrollAmount,
+      behavior: 'smooth'
+    });
+  };
+
+  const onDragEnd = (result: any) => {
+    const { destination, source, draggableId } = result;
+
+    // Drop outside a valid droppable area
+    if (!destination) return;
+
+    // Drop in the same position
+    if (
+      destination.droppableId === source.droppableId &&
+      destination.index === source.index
+    ) {
+      return;
+    }
+
+    // Update the lead's column
+    updateLeadColumn(parseInt(draggableId), destination.droppableId);
+  };
+
+  return (
+    <div className="flex-1 relative flex flex-col">
+      {/* Mobile column navigation */}
+      <div className="flex justify-between items-center px-2 md:hidden mb-2">
+        <button 
+          onClick={() => handleScroll('left')}
+          className="p-2 bg-gray-900 text-amber-300 rounded-md shadow-sm"
+          aria-label="Scroll left"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <div className="text-sm text-gray-600">Swipe to view columns</div>
+        <button 
+          onClick={() => handleScroll('right')}
+          className="p-2 bg-gray-900 text-amber-300 rounded-md shadow-sm"
+          aria-label="Scroll right"
+        >
+          <ChevronRight size={20} />
+        </button>
+      </div>
+      
+      {/* Kanban board */}
+      <DragDropContext onDragEnd={onDragEnd}>
+        <div 
+          ref={scrollContainerRef}
+          className="flex-1 overflow-x-auto overflow-y-hidden scrollbar-hide relative"
+          style={{ msOverflowStyle: 'none', scrollbarWidth: 'none' }}
+        >
+          <div className="inline-flex h-full p-2 md:p-4 space-x-4">
+            {Object.values(filteredColumns).map((column: any) => (
+              <LeadColumn key={column.id} column={column} />
+            ))}
+          </div>
+        </div>
+      </DragDropContext>
+      
+      {/* Desktop column navigation */}
+      {showScrollButtons && (
+        <div className="hidden md:block">
+          <button 
+            onClick={() => handleScroll('left')}
+            className="absolute left-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-900 text-amber-300 rounded-full shadow-lg z-10"
+            aria-label="Scroll left"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button 
+            onClick={() => handleScroll('right')}
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 bg-gray-900 text-amber-300 rounded-full shadow-lg z-10"
+            aria-label="Scroll right"
+          >
+            <ChevronRight size={20} />
+          </button>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default KanbanBoard;
