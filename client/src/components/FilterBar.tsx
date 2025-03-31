@@ -145,21 +145,7 @@ const FilterBar: React.FC = () => {
             )}
           </div>
           
-          <div className="flex items-center space-x-3">
-            <span className="text-sm text-gray-500">View:</span>
-            <button 
-              className={`p-1.5 rounded-md ${view === 'kanban' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
-              onClick={() => setView('kanban')}
-            >
-              <LayoutGrid className="h-4 w-4" />
-            </button>
-            <button 
-              className={`p-1.5 rounded-md ${view === 'list' ? 'bg-gray-900 text-white' : 'text-gray-500 hover:bg-gray-100'}`}
-              onClick={() => setView('list')}
-            >
-              <List className="h-4 w-4" />
-            </button>
-          </div>
+          {/* View options removed - only using Kanban view */}
         </div>
       </div>
     </div>

@@ -58,7 +58,7 @@ const Dashboard: React.FC = () => {
         <div className="flex-1 flex items-center justify-center">
           <div className="flex flex-col items-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-amber-500" />
-            <p className="text-lg text-gray-700">Cargando datos del panel...</p>
+            <p className="text-lg text-gray-700">Loading dashboard data...</p>
           </div>
         </div>
       </div>
@@ -76,7 +76,7 @@ const Dashboard: React.FC = () => {
           className="ml-4 bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2"
         >
           <UserPlus className="h-4 w-4" />
-          <span>Añadir Lead</span>
+          <span>Add Lead</span>
         </Button>
       </div>
       <KanbanBoard columns={leadState.columns} />

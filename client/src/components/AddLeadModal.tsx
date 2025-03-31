@@ -72,14 +72,33 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
     setIsSubmitting(true);
 
     try {
-      // Prepare data to send
+      // Prepare data to send with proper timestamp handling
+      const now = new Date().toISOString();
       const leadData = {
-        ...formData,
+        name: formData.name,
+        username: formData.username || `@${formData.name.toLowerCase().replace(/\s+/g, '_')}`,
+        time: now, // Always use ISO format for time
+        source: formData.source || null,
         tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
-        // Convert "none" values to empty strings or null before sending
-        smsStatus: formData.smsStatus === 'none' ? '' : formData.smsStatus,
-        priority: formData.priority === 'none' ? '' : formData.priority,
-        financing: formData.financing === 'none' ? '' : formData.financing
+        avatar: formData.avatar || null,
+        assessment: formData.assessment,
+        columnId: formData.columnId,
+        
+        // Handle optional fields
+        smsStatus: formData.smsStatus === 'none' ? null : formData.smsStatus,
+        sendTime: formData.sendTime ? new Date().toISOString() : null,
+        verifiedTime: formData.verifiedTime ? new Date().toISOString() : null,
+        priority: formData.priority === 'none' ? null : formData.priority,
+        consultDate: formData.consultDate ? new Date().toISOString() : null,
+        financing: formData.financing === 'none' ? null : formData.financing,
+        reason: formData.reason || null,
+        notes: formData.notes || null,
+        
+        // Contact info is required
+        contactInfo: {
+          email: formData.contactInfo.email || null,
+          phone: formData.contactInfo.phone || null
+        }
       };
 
       // Make POST request
