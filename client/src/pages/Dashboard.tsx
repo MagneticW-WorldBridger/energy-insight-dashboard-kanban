@@ -81,7 +81,7 @@ const Dashboard: React.FC = () => {
       </div>
       <KanbanBoard columns={leadState.columns} />
       
-      {/* Modal para añadir nuevo lead */}
+      {/* Modal to add a new lead */}
       <AddLeadModal 
         open={showAddLeadModal} 
         onOpenChange={setShowAddLeadModal} 

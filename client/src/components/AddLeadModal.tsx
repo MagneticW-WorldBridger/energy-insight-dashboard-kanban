@@ -27,12 +27,12 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
     tags: '',
     columnId: 'newLeads',
     assessment: 'Pending',
-    smsStatus: '',
+    smsStatus: 'none',
     sendTime: '',
     verifiedTime: '',
-    priority: '',
+    priority: 'none',
     consultDate: '',
-    financing: '',
+    financing: 'none',
     reason: '',
     notes: '',
     contactInfo: {
@@ -72,13 +72,17 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
     setIsSubmitting(true);
     
     try {
-      // Preparar los datos para enviar
+      // Prepare data to send
       const leadData = {
         ...formData,
-        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : []
+        tags: formData.tags ? formData.tags.split(',').map(tag => tag.trim()) : [],
+        // Convert "none" values to empty strings or null before sending
+        smsStatus: formData.smsStatus === 'none' ? '' : formData.smsStatus,
+        priority: formData.priority === 'none' ? '' : formData.priority,
+        financing: formData.financing === 'none' ? '' : formData.financing
       };
       
-      // Hacer la petición POST
+      // Make POST request
       const response = await fetch('/api/leads', {
         method: 'POST',
         headers: {
@@ -89,22 +93,22 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
       
       if (!response.ok) {
         const errorText = await response.text();
-        throw new Error(`Error al crear lead: ${errorText}`);
+        throw new Error(`Error creating lead: ${errorText}`);
       }
       
       const result = await response.json();
       
-      // Mostrar notificación de éxito
+      // Show success notification
       toast({
-        title: 'Lead creado',
-        description: `${formData.name} ha sido añadido correctamente`
+        title: 'Lead Created',
+        description: `${formData.name} has been added successfully`
       });
       
-      // Recargar datos y cerrar modal
+      // Reload data and close modal
       reloadLeads();
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       
-      // Limpiar formulario
+      // Clear form
       setFormData({
         name: '',
         username: '',
@@ -114,12 +118,12 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
         tags: '',
         columnId: 'newLeads',
         assessment: 'Pending',
-        smsStatus: '',
+        smsStatus: 'none',
         sendTime: '',
         verifiedTime: '',
-        priority: '',
+        priority: 'none',
         consultDate: '',
-        financing: '',
+        financing: 'none',
         reason: '',
         notes: '',
         contactInfo: {
@@ -130,10 +134,10 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
       
       onOpenChange(false);
     } catch (error) {
-      console.error('Error al crear lead:', error);
+      console.error('Error creating lead:', error);
       toast({
         title: 'Error',
-        description: error instanceof Error ? error.message : 'Error al crear lead',
+        description: error instanceof Error ? error.message : 'Error creating lead',
         variant: 'destructive'
       });
     } finally {
@@ -146,7 +150,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl font-semibold flex items-center">
-            Añadir Nuevo Lead
+            Add New Lead
           </DialogTitle>
           <Button 
             variant="ghost" 
@@ -159,25 +163,25 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
         
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Sección de Información básica */}
+            {/* Basic Information Section */}
             <div className="md:col-span-2">
-              <h3 className="text-lg font-medium mb-2 border-b pb-1">Información básica</h3>
+              <h3 className="text-lg font-medium mb-2 border-b pb-1">Basic Information</h3>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="name">Nombre completo *</Label>
+              <Label htmlFor="name">Full Name *</Label>
               <Input 
                 id="name" 
                 name="name" 
                 value={formData.name} 
                 onChange={handleChange} 
-                placeholder="Nombre del lead" 
+                placeholder="Lead's name" 
                 required 
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="username">Nombre de usuario</Label>
+              <Label htmlFor="username">Username</Label>
               <Input 
                 id="username" 
                 name="username" 
@@ -188,7 +192,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="time">Tiempo</Label>
+              <Label htmlFor="time">Time</Label>
               <Input 
                 id="time" 
                 name="time" 
@@ -199,7 +203,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="source">Fuente</Label>
+              <Label htmlFor="source">Source</Label>
               <Input 
                 id="source" 
                 name="source" 
@@ -210,7 +214,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="tags">Etiquetas (separadas por comas)</Label>
+              <Label htmlFor="tags">Tags (comma separated)</Label>
               <Input 
                 id="tags" 
                 name="tags" 
@@ -221,7 +225,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="avatar">Avatar URL (opcional)</Label>
+              <Label htmlFor="avatar">Avatar URL (optional)</Label>
               <Input 
                 id="avatar" 
                 name="avatar" 
@@ -231,9 +235,9 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               />
             </div>
             
-            {/* Sección de Contacto */}
+            {/* Contact Information Section */}
             <div className="md:col-span-2 mt-2">
-              <h3 className="text-lg font-medium mb-2 border-b pb-1">Información de contacto</h3>
+              <h3 className="text-lg font-medium mb-2 border-b pb-1">Contact Information</h3>
             </div>
             
             <div className="space-y-2">
@@ -244,12 +248,12 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
                 value={formData.contactInfo.email} 
                 onChange={handleChange} 
                 type="email" 
-                placeholder="email@ejemplo.com" 
+                placeholder="email@example.com" 
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="phone">Teléfono</Label>
+              <Label htmlFor="phone">Phone</Label>
               <Input 
                 id="phone" 
                 name="phone" 
@@ -259,46 +263,46 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               />
             </div>
             
-            {/* Sección de Estado y progreso */}
+            {/* Status and Progress Section */}
             <div className="md:col-span-2 mt-2">
-              <h3 className="text-lg font-medium mb-2 border-b pb-1">Estado y Progreso</h3>
+              <h3 className="text-lg font-medium mb-2 border-b pb-1">Status and Progress</h3>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="columnId">Columna (Estado)</Label>
+              <Label htmlFor="columnId">Column (Status)</Label>
               <Select name="columnId" value={formData.columnId} onValueChange={handleSelectChange('columnId')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccione una columna" />
+                  <SelectValue placeholder="Select a column" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="newLeads">Nuevos Leads</SelectItem>
-                  <SelectItem value="phoneVerified">Verificados por Teléfono</SelectItem>
-                  <SelectItem value="questionnaireStarted">Cuestionario Iniciado</SelectItem>
-                  <SelectItem value="questionnaireComplete">Cuestionario Completado</SelectItem>
-                  <SelectItem value="inProgress">En Progreso</SelectItem>
-                  <SelectItem value="closed">Cerrado</SelectItem>
-                  <SelectItem value="notInterested">No Interesado</SelectItem>
+                  <SelectItem value="newLeads">New Leads</SelectItem>
+                  <SelectItem value="phoneVerified">Phone Verified</SelectItem>
+                  <SelectItem value="questionnaireStarted">Questionnaire Started</SelectItem>
+                  <SelectItem value="questionnaireComplete">Questionnaire Complete</SelectItem>
+                  <SelectItem value="inProgress">In Progress</SelectItem>
+                  <SelectItem value="closed">Closed</SelectItem>
+                  <SelectItem value="notInterested">Not Interested</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="smsStatus">Estado SMS</Label>
-              <Select name="smsStatus" value={formData.smsStatus || ''} onValueChange={handleSelectChange('smsStatus')}>
+              <Label htmlFor="smsStatus">SMS Status</Label>
+              <Select name="smsStatus" value={formData.smsStatus} onValueChange={handleSelectChange('smsStatus')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccione estado SMS" />
+                  <SelectValue placeholder="Select SMS status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No aplica</SelectItem>
-                  <SelectItem value="Pending">Pendiente</SelectItem>
-                  <SelectItem value="Sent">Enviado</SelectItem>
-                  <SelectItem value="Delivered">Entregado</SelectItem>
+                  <SelectItem value="none">Not Applicable</SelectItem>
+                  <SelectItem value="Pending">Pending</SelectItem>
+                  <SelectItem value="Sent">Sent</SelectItem>
+                  <SelectItem value="Delivered">Delivered</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="sendTime">Hora de envío SMS</Label>
+              <Label htmlFor="sendTime">SMS Send Time</Label>
               <Input 
                 id="sendTime" 
                 name="sendTime" 
@@ -309,7 +313,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="verifiedTime">Hora de verificación</Label>
+              <Label htmlFor="verifiedTime">Verification Time</Label>
               <Input 
                 id="verifiedTime" 
                 name="verifiedTime" 
@@ -320,22 +324,22 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="priority">Prioridad</Label>
-              <Select name="priority" value={formData.priority || ''} onValueChange={handleSelectChange('priority')}>
+              <Label htmlFor="priority">Priority</Label>
+              <Select name="priority" value={formData.priority} onValueChange={handleSelectChange('priority')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccione prioridad" />
+                  <SelectValue placeholder="Select priority" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No definida</SelectItem>
-                  <SelectItem value="High Intent">Intención Alta</SelectItem>
-                  <SelectItem value="Medium Intent">Intención Media</SelectItem>
-                  <SelectItem value="Low Intent">Intención Baja</SelectItem>
+                  <SelectItem value="none">Not Defined</SelectItem>
+                  <SelectItem value="High Intent">High Intent</SelectItem>
+                  <SelectItem value="Medium Intent">Medium Intent</SelectItem>
+                  <SelectItem value="Low Intent">Low Intent</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="consultDate">Fecha de consulta</Label>
+              <Label htmlFor="consultDate">Consultation Date</Label>
               <Input 
                 id="consultDate" 
                 name="consultDate" 
@@ -346,40 +350,40 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="financing">Financiamiento</Label>
-              <Select name="financing" value={formData.financing || ''} onValueChange={handleSelectChange('financing')}>
+              <Label htmlFor="financing">Financing</Label>
+              <Select name="financing" value={formData.financing} onValueChange={handleSelectChange('financing')}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Seleccione tipo de financiamiento" />
+                  <SelectValue placeholder="Select financing type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No definido</SelectItem>
-                  <SelectItem value="Self-Pay">Pago propio</SelectItem>
+                  <SelectItem value="none">Not Defined</SelectItem>
+                  <SelectItem value="Self-Pay">Self-Pay</SelectItem>
                   <SelectItem value="Care Credit">Care Credit</SelectItem>
-                  <SelectItem value="Payment Plan">Plan de pagos</SelectItem>
-                  <SelectItem value="Insurance">Seguro</SelectItem>
+                  <SelectItem value="Payment Plan">Payment Plan</SelectItem>
+                  <SelectItem value="Insurance">Insurance</SelectItem>
                 </SelectContent>
               </Select>
             </div>
             
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="reason">Razón (si aplica)</Label>
+              <Label htmlFor="reason">Reason (if applicable)</Label>
               <Input 
                 id="reason" 
                 name="reason" 
                 value={formData.reason} 
                 onChange={handleChange} 
-                placeholder="Razón para no continuar, cancelar, etc." 
+                placeholder="Reason for not proceeding, cancellation, etc." 
               />
             </div>
             
             <div className="space-y-2 md:col-span-2">
-              <Label htmlFor="notes">Notas</Label>
+              <Label htmlFor="notes">Notes</Label>
               <Textarea 
                 id="notes" 
                 name="notes" 
                 value={formData.notes} 
                 onChange={handleChange} 
-                placeholder="Notas adicionales sobre el lead" 
+                placeholder="Additional notes about the lead" 
                 rows={4}
               />
             </div>
@@ -392,14 +396,14 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               onClick={() => onOpenChange(false)}
               className="mr-2"
             >
-              Cancelar
+              Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={isSubmitting}
               className="bg-amber-500 hover:bg-amber-600"
             >
-              {isSubmitting ? 'Creando...' : 'Crear Lead'}
+              {isSubmitting ? 'Creating...' : 'Create Lead'}
             </Button>
           </DialogFooter>
         </form>
