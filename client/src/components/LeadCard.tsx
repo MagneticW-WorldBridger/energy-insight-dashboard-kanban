@@ -74,11 +74,40 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
     );
   };
 
+  const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
+    if (e.dataTransfer) {
+      // Set the dragged data
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', lead.id.toString());
+      
+      // Add a visual feedback for the drag operation
+      const dragImage = new Image();
+      dragImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
+      e.dataTransfer.setDragImage(dragImage, 0, 0);
+      
+      // Add a class to show we're dragging
+      e.currentTarget.classList.add('opacity-70');
+    }
+    
+    // Call the parent component's onDragStart handler
+    if (onDragStart) {
+      onDragStart();
+    }
+  };
+  
+  const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+    // Remove the dragging class
+    e.currentTarget.classList.remove('opacity-70');
+  };
+
   return (
     <>
       <div 
-        className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden cursor-grab active:cursor-grabbing"
-        onDragStart={onDragStart}
+        className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden cursor-grab active:cursor-grabbing hover:shadow transition-shadow duration-200"
+        draggable="true"
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        data-lead-id={lead.id}
       >
         <div className="p-3">
           <div className="flex items-center justify-between mb-2">

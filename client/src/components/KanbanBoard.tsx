@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import LeadColumn from './LeadColumn';
 import { LeadColumn as LeadColumnType, Lead } from '@/types/leads';
 import { useLeads } from '@/context/LeadContext';
 import { toast } from '@/hooks/use-toast';
+import { queryClient } from '@/lib/queryClient';
 
 interface KanbanBoardProps {
   columns: {
@@ -30,7 +31,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
   };
 
   // Handle drop on a column
-  const handleDrop = async (columnId: number) => {
+  const handleDrop = useCallback(async (columnId: number) => {
     if (!draggedLeadId || !isDragging) return;
     
     try {
@@ -55,13 +56,21 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       }
       
       // Make API request to update the lead's column
-      await fetch(`/api/leads/${draggedLeadId}/column`, {
+      const response = await fetch(`/api/leads/${draggedLeadId}/column`, {
         method: 'PATCH',
         body: JSON.stringify({ columnId: columnId.toString() }),
         headers: {
           'Content-Type': 'application/json'
         }
       });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update lead column: ${response.statusText}`);
+      }
+      
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/columns'] });
       
       toast({
         title: 'Lead moved',
@@ -79,7 +88,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       setIsDragging(false);
       setDraggedLeadId(null);
     }
-  };
+  }, [draggedLeadId, isDragging, columns]);
   
   // Filter leads based on search term and filter options
   const filteredColumns = Object.entries(columns).reduce<Record<string, LeadColumnType>>((acc, [key, column]) => {

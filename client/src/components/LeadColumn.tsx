@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import LeadCard from './LeadCard';
 import { LeadColumn as LeadColumnType, Lead } from '@/types/leads';
 import { MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
@@ -11,32 +11,69 @@ interface LeadColumnProps {
 
 const LeadColumn: React.FC<LeadColumnProps> = ({ column, onDragStart, onDrop }) => {
   const [collapsed, setCollapsed] = useState(false);
+  const [isDragOver, setIsDragOver] = useState(false);
+  const columnRef = useRef<HTMLDivElement>(null);
   
   const handleDragStart = (lead: Lead) => {
     if (onDragStart) {
       onDragStart(lead.id);
     }
   };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Don't show dragover state when column is collapsed
+    if (!collapsed && !isDragOver) {
+      setIsDragOver(true);
+    }
+  };
+  
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    
+    // Only consider it a leave if we're leaving the column element itself
+    // not its children
+    if (e.currentTarget === e.target) {
+      setIsDragOver(false);
+    }
+  };
+  
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    setIsDragOver(false);
+    
+    if (collapsed) return;
+    
+    if (onDrop) {
+      onDrop(parseInt(column.id));
+    }
+  };
   
   return (
     <div 
-      className={`transition-all duration-300 flex flex-col bg-gray-50 rounded-md shadow-sm
+      ref={columnRef}
+      className={`transition-all duration-300 flex flex-col 
+        ${collapsed ? 'bg-gray-900' : isDragOver ? 'bg-amber-50' : 'bg-gray-50'} 
+        rounded-md shadow-sm
         ${collapsed ? 'min-w-[60px] max-w-[60px]' : 'min-w-[320px] max-w-[320px]'}`} 
       data-component="lead-column"
+      data-column-id={column.id}
       style={{ height: "calc(100vh - 200px)" }}
-      onDragOver={(e) => e.preventDefault()}
-      onDrop={() => onDrop && onDrop(parseInt(column.id))}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
     >
-      <div className={`${collapsed ? 'p-2' : 'p-3'} bg-gray-900 text-amber-300 rounded-t-md flex items-center justify-between`}>
+      <div className={`${collapsed ? 'h-full' : 'p-3'} bg-gray-900 text-amber-300 ${collapsed ? 'rounded-md' : 'rounded-t-md'} flex items-center justify-between`}>
         {collapsed ? (
           <div 
-            className="writing-vertical py-4 flex flex-col items-center justify-center w-full cursor-pointer"
+            className="h-full w-full flex items-center justify-center cursor-pointer"
             onClick={() => setCollapsed(false)}
           >
-            <div className="rotate-90 whitespace-nowrap flex items-center font-medium">
-              {column.title}
-              <span className="ml-2 px-1.5 py-0.5 bg-white bg-opacity-20 rounded text-xs">{column.count}</span>
-            </div>
+            <span className="block writing-mode-vertical-rl transform rotate-180 whitespace-nowrap font-medium py-4">
+              {column.title} ({column.count})
+            </span>
           </div>
         ) : (
           <>
