@@ -1,12 +1,96 @@
 import React, { useRef, useState, useEffect } from 'react';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
-import LeadColumn from './LeadColumn';
 import LeadCard from './LeadCard';
 import { LeadColumn as LeadColumnType } from '@/types/leads';
 import { useLeads } from '@/context/LeadContext';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { queryClient } from '@/lib/queryClient';
+
+interface ColumnWrapperProps {
+  columnId: string;
+  column: LeadColumnType;
+}
+
+// Column wrapper component to handle the collapse/expand functionality with drag and drop
+const ColumnWrapper: React.FC<ColumnWrapperProps> = ({ columnId, column }) => {
+  const [collapsed, setCollapsed] = useState(false);
+  
+  return (
+    <Droppable key={columnId} droppableId={columnId}>
+      {(provided, snapshot) => (
+        <div
+          ref={provided.innerRef}
+          {...provided.droppableProps}
+          className={`transition-all duration-300
+            ${collapsed ? 'bg-gray-900' : snapshot.isDraggingOver ? 'bg-amber-50' : 'bg-gray-50'} 
+            rounded-md shadow-sm
+            ${collapsed ? 'min-w-[60px] max-w-[60px]' : 'min-w-[320px] max-w-[320px]'}`}
+          style={{ height: "calc(100vh - 200px)" }}
+        >
+          <div className={`${collapsed ? 'h-full' : 'p-3'} bg-gray-900 text-amber-300 ${collapsed ? 'rounded-md' : 'rounded-t-md'} flex items-center justify-between`}>
+            {collapsed ? (
+              <div 
+                className="h-full w-full flex items-center justify-center cursor-pointer"
+                onClick={() => setCollapsed(false)}
+              >
+                <span className="block transform rotate-180 whitespace-nowrap font-medium py-4" style={{ writingMode: 'vertical-rl' }}>
+                  {column.title} ({column.count})
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center">
+                  <h3 className="font-medium">{column.title}</h3>
+                  <span className="ml-2 px-1.5 py-0.5 bg-white bg-opacity-20 rounded text-xs">{column.count}</span>
+                </div>
+                <div className="flex items-center">
+                  <button 
+                    className="p-1 rounded hover:bg-gray-700 mr-1"
+                    onClick={() => setCollapsed(true)}
+                    title="Collapse column"
+                  >
+                    <ChevronLeft className="h-4 w-4" />
+                  </button>
+                  <button className="p-1 rounded hover:bg-gray-700">
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+          
+          {!collapsed && (
+            <div className="p-3 overflow-y-auto" style={{ height: "calc(100% - 48px)" }}>
+              {column.items.map((lead, index) => (
+                <Draggable 
+                  key={lead.id.toString()} 
+                  draggableId={lead.id.toString()} 
+                  index={index}
+                >
+                  {(provided, snapshot) => (
+                    <div
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className={`mb-3 ${snapshot.isDragging ? 'opacity-70' : ''}`}
+                      style={{
+                        ...provided.draggableProps.style,
+                      }}
+                    >
+                      <LeadCard lead={lead} />
+                    </div>
+                  )}
+                </Draggable>
+              ))}
+              {provided.placeholder}
+            </div>
+          )}
+        </div>
+      )}
+    </Droppable>
+  );
+};
 
 interface KanbanBoardProps {
   columns: {
@@ -209,49 +293,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         >
           <div className="inline-flex h-full p-2 md:p-4 space-x-4">
             {Object.entries(filteredColumns).map(([columnId, column]) => (
-              <Droppable key={columnId} droppableId={columnId}>
-                {(provided, snapshot) => (
-                  <div
-                    ref={provided.innerRef}
-                    {...provided.droppableProps}
-                    className={`min-w-[320px] max-w-[320px] rounded-md shadow-sm 
-                      ${snapshot.isDraggingOver ? 'bg-amber-50' : 'bg-gray-50'}`}
-                    style={{ height: "calc(100vh - 200px)" }}
-                  >
-                    <div className="bg-gray-900 text-amber-300 rounded-t-md p-3 flex items-center justify-between">
-                      <div className="flex items-center">
-                        <h3 className="font-medium">{column.title}</h3>
-                        <span className="ml-2 px-1.5 py-0.5 bg-white bg-opacity-20 rounded text-xs">{column.count}</span>
-                      </div>
-                    </div>
-                    
-                    <div className="p-3 overflow-y-auto" style={{ height: "calc(100% - 48px)" }}>
-                      {column.items.map((lead, index) => (
-                        <Draggable 
-                          key={lead.id.toString()} 
-                          draggableId={lead.id.toString()} 
-                          index={index}
-                        >
-                          {(provided, snapshot) => (
-                            <div
-                              ref={provided.innerRef}
-                              {...provided.draggableProps}
-                              {...provided.dragHandleProps}
-                              className={`mb-3 ${snapshot.isDragging ? 'opacity-70' : ''}`}
-                              style={{
-                                ...provided.draggableProps.style,
-                              }}
-                            >
-                              <LeadCard lead={lead} />
-                            </div>
-                          )}
-                        </Draggable>
-                      ))}
-                      {provided.placeholder}
-                    </div>
-                  </div>
-                )}
-              </Droppable>
+              <ColumnWrapper
+                key={columnId}
+                columnId={columnId}
+                column={column}
+              />
             ))}
           </div>
         </div>
