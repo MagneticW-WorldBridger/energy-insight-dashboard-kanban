@@ -80,6 +80,8 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
       e.dataTransfer.effectAllowed = 'move';
       e.dataTransfer.setData('text/plain', lead.id.toString());
       
+      console.log(`Started dragging lead ${lead.id}: ${lead.name} (Column ID: ${lead.columnId || 'undefined'})`);
+      
       // Add a visual feedback for the drag operation
       const dragImage = new Image();
       dragImage.src = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';

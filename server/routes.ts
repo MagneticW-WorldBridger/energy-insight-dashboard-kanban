@@ -310,6 +310,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { id } = req.params;
       const { columnId } = req.body;
       
+      console.log(`Attempting to move lead ${id} to column ${columnId}`);
+      
       if (!columnId) {
         return res.status(400).json({ message: 'columnId is required' });
       }
@@ -323,6 +325,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Check if the column exists
       const column = await storage.getColumn(columnId);
       if (!column) {
+        console.error(`Column with id "${columnId}" was not found in the database`);
+        
+        // For debugging: List all available columns
+        const allColumns = await storage.getColumns();
+        console.log('Available columns:', allColumns.map(col => col.id));
+        
         return res.status(404).json({ message: 'Column not found' });
       }
       

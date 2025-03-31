@@ -32,7 +32,10 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
 
   // Handle drop on a column
   const handleDrop = useCallback(async (columnId: string) => {
-    if (!draggedLeadId || !isDragging) return;
+    if (!draggedLeadId || !isDragging) {
+      console.log('Drop ignored: Not dragging or no lead ID', { isDragging, draggedLeadId });
+      return;
+    }
     
     try {
       // Find the lead being dragged
@@ -49,7 +52,22 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         }
       }
       
-      if (!draggedLead || !originalColumnId || originalColumnId === columnId) {
+      if (!draggedLead) {
+        console.error(`Could not find lead with ID ${draggedLeadId} in any column`);
+        setIsDragging(false);
+        setDraggedLeadId(null);
+        return;
+      }
+      
+      if (!originalColumnId) {
+        console.error(`Could not determine original column for lead ${draggedLeadId}`);
+        setIsDragging(false);
+        setDraggedLeadId(null);
+        return;
+      }
+      
+      if (originalColumnId === columnId) {
+        console.log(`Lead ${draggedLeadId} dropped in same column (${columnId}). No action needed.`);
         setIsDragging(false);
         setDraggedLeadId(null);
         return;
@@ -71,6 +89,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         console.error('Server response:', errorText);
         throw new Error(`Failed to update lead column: ${response.statusText}`);
       }
+      
+      const result = await response.json();
+      console.log('API response:', result);
       
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });

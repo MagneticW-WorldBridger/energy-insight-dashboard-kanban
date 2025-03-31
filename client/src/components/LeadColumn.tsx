@@ -46,6 +46,8 @@ const LeadColumn: React.FC<LeadColumnProps> = ({ column, onDragStart, onDrop }) 
     
     if (collapsed) return;
     
+    console.log(`Drop detected on column: ${column.id} (${column.title})`);
+    
     if (onDrop) {
       // The column.id is already a string, so we can pass it directly to onDrop
       onDrop(column.id);
