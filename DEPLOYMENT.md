@@ -49,10 +49,13 @@ POSTGRES_PASSWORD=your-postgres-password
 POSTGRES_DATABASE=your-postgres-database
 POSTGRES_PORT=your-postgres-port
 WEBHOOK_API_KEY=your-chosen-webhook-api-key
+OPENAI_API_KEY=your-openai-api-key
 NODE_ENV=production
 ```
 
-Replace the placeholders with your actual database credentials.
+Replace the placeholders with your actual credentials.
+
+> **Important**: The `OPENAI_API_KEY` is required for the questionnaire analysis feature that evaluates leads' likelihood and perceived benefits of cosmetic surgery. The system uses the GPT-4o model to provide this analysis.
 
 ### 4. Deploy the Application
 
@@ -126,13 +129,54 @@ The webhook payload should be in JSON format and include the required lead field
 ```bash
 curl -X POST https://your-vercel-app-url.vercel.app/api/leads \
   -H "Content-Type: application/json" \
-  -d '{"name": "John Doe", "email": "john@example.com", "phone": "+1234567890"}'
+  -d '{"name": "John Doe", "contactInfo": {"email": "john@example.com", "phone": "+1234567890"}}'
+```
+
+#### Creating a new lead (complete)
+
+```bash
+curl -X POST https://your-vercel-app-url.vercel.app/api/leads \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Jane Smith",
+    "username": "@janesmith",
+    "time": "10m ago",
+    "source": "Instagram Ad",
+    "tags": ["Face", "Botox", "Consultation"],
+    "avatar": "https://example.com/avatar.jpg",
+    "assessment": "Pending",
+    "columnId": "newLeads",
+    "smsStatus": "Pending",
+    "sendTime": "9:30 AM",
+    "verifiedTime": "",
+    "priority": "Medium Intent",
+    "consultDate": "Apr 15, 2023",
+    "financing": "Self-Pay",
+    "reason": "",
+    "notes": "Interested in facial treatments and fillers",
+    "contactInfo": {
+      "email": "jane@example.com",
+      "phone": "+1987654321"
+    }
+  }'
+```
+
+#### Updating a lead (partial)
+
+```bash
+curl -X PATCH https://your-vercel-app-url.vercel.app/api/leads/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "priority": "High Intent",
+    "consultDate": "Apr 20, 2023",
+    "notes": "Updated after phone call, very interested in proceeding"
+  }'
 ```
 
 #### Updating a lead's questionnaire
 
 ```bash
-curl -X PUT https://your-vercel-app-url.vercel.app/api/leads/1 \
+curl -X PATCH https://your-vercel-app-url.vercel.app/api/leads/1 \
   -H "Content-Type: application/json" \
   -d '{
     "questionnaire": {
@@ -155,6 +199,17 @@ curl -X PUT https://your-vercel-app-url.vercel.app/api/leads/1 \
   }'
 ```
 
+#### Updating SMS status
+
+```bash
+curl -X PATCH https://your-vercel-app-url.vercel.app/api/leads/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "smsStatus": "Delivered",
+    "sendTime": "10:45 AM"
+  }'
+```
+
 #### Moving a lead to a different column
 
 ```bash
@@ -169,6 +224,24 @@ curl -X PATCH https://your-vercel-app-url.vercel.app/api/leads/1/column \
 curl -X DELETE https://your-vercel-app-url.vercel.app/api/leads/1
 ```
 
+#### Getting leads from a specific column
+
+```bash
+curl -X GET https://your-vercel-app-url.vercel.app/api/columns/phoneVerified/leads
+```
+
+#### Creating a new column
+
+```bash
+curl -X POST https://your-vercel-app-url.vercel.app/api/columns \
+  -H "Content-Type: application/json" \
+  -d '{
+    "id": "customColumn",
+    "title": "My Custom Column",
+    "order": 8
+  }'
+```
+
 ## Testing the Deployment
 
 After deploying, you can test your application by:
@@ -177,6 +250,33 @@ After deploying, you can test your application by:
 2. Using the webhook test script to send test data:
    - Update the webhook URL in `server/webhook-test.ts` to your Vercel URL
    - Run `npx tsx server/webhook-test.ts`
+
+## OpenAI Integration for Questionnaire Analysis
+
+This application uses OpenAI's GPT-4o model to analyze questionnaire responses and provide personalized assessments for leads. This feature helps your team identify high-potential clients based on their responses to 15 key questions.
+
+### How It Works
+
+1. When a lead completes a questionnaire (15 questions rated 1-7), the responses are sent to the OpenAI API
+2. The AI analyzes the responses and calculates two key scores:
+   - **Likelihood Score**: The probability of the lead proceeding with cosmetic surgery
+   - **Benefits Score**: The perceived value and benefits of cosmetic surgery for this lead
+3. The AI also provides an overall assessment classification: "High Intent", "Medium Intent", or "Low Intent"
+4. These scores and classification help your team prioritize leads and tailor their approach
+
+### Example of Analysis Data
+
+```json
+{
+  "likelihood": 6.8,
+  "benefits": 7.2,
+  "overall": "High Intent"
+}
+```
+
+### Customizing the Analysis
+
+To customize the analysis logic, you can modify the `analyzeQuestionnaire()` function in `server/openai-service.ts`. This allows you to adapt the AI's assessment criteria based on your specific business needs and client demographics.
 
 ## Troubleshooting
 
@@ -188,3 +288,12 @@ If you encounter issues with the deployment:
 4. Check that your webhook API key is correctly configured
 
 For database connection issues, make sure your Neon database allows connections from external sources and that your connection string is correct.
+
+### OpenAI API Issues
+
+If you encounter problems with the questionnaire analysis:
+
+1. Verify your OpenAI API key is correctly set in environment variables
+2. Check the OpenAI API usage limits and billing status
+3. For error details, inspect server logs in the Vercel dashboard
+4. Test your OpenAI API key independently using the `test-openai.js` script

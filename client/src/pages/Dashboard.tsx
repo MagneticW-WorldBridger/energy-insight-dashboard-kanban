@@ -1,13 +1,16 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
 import StatsBar from '@/components/StatsBar';
 import FilterBar from '@/components/FilterBar';
 import KanbanBoard from '@/components/KanbanBoard';
+import AddLeadModal from '@/components/AddLeadModal';
 import { useLeads } from '@/context/LeadContext';
-import { Loader2 } from 'lucide-react';
+import { Loader2, UserPlus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const Dashboard: React.FC = () => {
   const { leadState, isLoading, reloadLeads } = useLeads();
+  const [showAddLeadModal, setShowAddLeadModal] = useState(false);
 
   // Cargar datos al inicio
   useEffect(() => {
@@ -66,8 +69,23 @@ const Dashboard: React.FC = () => {
     <div className="flex flex-col h-screen">
       <Header />
       <StatsBar stats={leadState.stats} />
-      <FilterBar />
+      <div className="flex items-center justify-between px-4 py-3">
+        <FilterBar />
+        <Button 
+          onClick={() => setShowAddLeadModal(true)}
+          className="ml-4 bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2"
+        >
+          <UserPlus className="h-4 w-4" />
+          <span>Añadir Lead</span>
+        </Button>
+      </div>
       <KanbanBoard columns={leadState.columns} />
+      
+      {/* Modal para añadir nuevo lead */}
+      <AddLeadModal 
+        open={showAddLeadModal} 
+        onOpenChange={setShowAddLeadModal} 
+      />
     </div>
   );
 };
