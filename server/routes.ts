@@ -313,14 +313,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Attempting to move lead ${id} to column ${columnId}`);
       
       if (!columnId) {
+        console.error('Missing columnId in request body');
         return res.status(400).json({ message: 'columnId is required' });
       }
       
       // First check if the lead exists
       const lead = await storage.getLead(parseInt(id));
       if (!lead) {
+        console.error(`Lead with id ${id} was not found in the database`);
         return res.status(404).json({ message: 'Lead not found' });
       }
+      
+      console.log(`Current lead ${id} state:`, JSON.stringify({
+        id: lead.id,
+        name: lead.name,
+        columnId: lead.columnId
+      }));
       
       // Check if the column exists
       const column = await storage.getColumn(columnId);
@@ -329,7 +337,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         // For debugging: List all available columns
         const allColumns = await storage.getColumns();
-        console.log('Available columns:', allColumns.map(col => col.id));
+        console.log('Available columns:', allColumns.map(col => ({ id: col.id, title: col.title })));
         
         return res.status(404).json({ message: 'Column not found' });
       }
@@ -338,8 +346,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const updatedLead = await storage.updateLead(parseInt(id), { columnId });
       
       if (!updatedLead) {
+        console.error(`Failed to update lead ${id} column to ${columnId}`);
         return res.status(500).json({ message: 'Failed to update lead' });
       }
+      
+      console.log(`Successfully moved lead ${id} from column ${lead.columnId} to ${updatedLead.columnId}`);
       
       res.json({
         id: updatedLead.id,

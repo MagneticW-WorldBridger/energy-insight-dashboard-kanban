@@ -58,6 +58,38 @@ Replace the placeholders with your actual database credentials.
 
 Click "Deploy" in the Vercel dashboard. Vercel will build and deploy your application.
 
+## API Endpoints Reference
+
+The dashboard offers the following API endpoints:
+
+### Lead Management Endpoints
+
+| Method | Endpoint | Description | Required Parameters | Optional Parameters |
+|--------|----------|-------------|---------------------|---------------------|
+| GET | `/api/leads` | Get all leads | None | None |
+| GET | `/api/leads/:id` | Get a specific lead by ID | `id` (in URL) | None |
+| POST | `/api/leads` | Create a new lead | `name` (in body) | `phone`, `email`, and other lead fields |
+| PUT | `/api/leads/:id` | Update a lead (complete) | `id` (in URL) | All lead fields |
+| PATCH | `/api/leads/:id` | Update a lead (partial) | `id` (in URL) | Any lead fields to update |
+| PATCH | `/api/leads/:id/column` | Move a lead to a different column | `id` (in URL), `columnId` (in body) | None |
+| DELETE | `/api/leads/:id` | Delete a lead | `id` (in URL) | None |
+
+### Column Management Endpoints
+
+| Method | Endpoint | Description | Required Parameters | Optional Parameters |
+|--------|----------|-------------|---------------------|---------------------|
+| GET | `/api/columns` | Get all columns | None | None |
+| GET | `/api/columns/:columnId/leads` | Get leads in a specific column | `columnId` (in URL) | None |
+| POST | `/api/columns` | Create a new column | `id`, `title`, `order` | None |
+| PATCH | `/api/columns/:id` | Update a column | `id` (in URL) | `title`, `order` |
+| DELETE | `/api/columns/:id` | Delete a column | `id` (in URL) | None |
+
+### Statistics Endpoint
+
+| Method | Endpoint | Description | Required Parameters | Optional Parameters |
+|--------|----------|-------------|---------------------|---------------------|
+| GET | `/api/stats` | Get dashboard statistics | None | None |
+
 ## Webhook Integration
 
 For external systems to send lead data to your dashboard, they need to make POST requests to your webhook endpoint:
@@ -85,6 +117,56 @@ The webhook payload should be in JSON format and include the required lead field
     "phone": "+1234567890"
   }
 }
+```
+
+### API Examples
+
+#### Creating a new lead (minimal)
+
+```bash
+curl -X POST https://your-vercel-app-url.vercel.app/api/leads \
+  -H "Content-Type: application/json" \
+  -d '{"name": "John Doe", "email": "john@example.com", "phone": "+1234567890"}'
+```
+
+#### Updating a lead's questionnaire
+
+```bash
+curl -X PUT https://your-vercel-app-url.vercel.app/api/leads/1 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "questionnaire": {
+      "q1": "5",
+      "q2": "3",
+      "q3": "7",
+      "q4": "2",
+      "q5": "6",
+      "q6": "4",
+      "q7": "6",
+      "q8": "7",
+      "q9": "5",
+      "q10": "2",
+      "q11": "3",
+      "q12": "5",
+      "q13": "6",
+      "q14": "7",
+      "q15": "4"
+    }
+  }'
+```
+
+#### Moving a lead to a different column
+
+```bash
+curl -X PATCH https://your-vercel-app-url.vercel.app/api/leads/1/column \
+  -H "Content-Type: application/json" \
+  -d '{"columnId": "phoneVerified"}'
+```
+
+#### Deleting a lead
+
+```bash
+curl -X DELETE https://your-vercel-app-url.vercel.app/api/leads/1
 ```
 
 ## Testing the Deployment

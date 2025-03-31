@@ -168,20 +168,27 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
     const { destination, source, draggableId } = result;
 
     // Drop outside a valid droppable area
-    if (!destination) return;
+    if (!destination) {
+      console.log("Lead dropped outside of a droppable area");
+      return;
+    }
 
     // Drop in the same position
     if (
       destination.droppableId === source.droppableId &&
       destination.index === source.index
     ) {
+      console.log("Lead dropped in the same position");
       return;
     }
     
     // Find the lead being dragged
-    const draggedLeadId = parseInt(draggableId);
+    // Remove any prefix (like 'lead-') in case the draggableId has one
+    const draggedLeadId = parseInt(draggableId.replace('lead-', ''));
     const sourceColumnId = source.droppableId;
     const destinationColumnId = destination.droppableId;
+    
+    console.log(`Parsed draggableId: ${draggableId} to leadId: ${draggedLeadId}`);
     
     let draggedLead;
     for (const colKey in localColumns) {
@@ -194,10 +201,21 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
     
     if (!draggedLead) {
       console.error(`Could not find lead with ID ${draggedLeadId}`);
+      toast({
+        title: 'Error',
+        description: 'Could not find the dragged lead. Please try again.',
+        variant: 'destructive'
+      });
       return;
     }
     
     console.log(`Moving lead ${draggedLeadId} from column ${sourceColumnId} to column ${destinationColumnId}`);
+    
+    // Show a loading toast that we'll dismiss later
+    const loadingToastId = toast({
+      title: 'Moving lead...',
+      description: `Moving ${draggedLead.name} to ${localColumns[destinationColumnId].title}`,
+    }).id;
     
     // Optimistically update the UI
     const updatedColumns = {...localColumns};
@@ -224,6 +242,8 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
     
     // Make API request to update the lead's column
     try {
+      console.log(`Sending PATCH request to update lead ${draggedLeadId} column to ${destinationColumnId}`);
+      
       const response = await fetch(`/api/leads/${draggedLeadId}/column`, {
         method: 'PATCH',
         body: JSON.stringify({ columnId: destinationColumnId }),
@@ -232,22 +252,36 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         }
       });
       
+      // No need to explicitly dismiss the loading toast
+      // The new toast below will replace it
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Server response:', errorText);
-        throw new Error(`Failed to update lead column: ${response.statusText}`);
+        let errorText = '';
+        try {
+          errorText = await response.text();
+        } catch (e) {
+          errorText = 'Could not parse error response';
+        }
+        
+        console.error('Server error response:', errorText);
+        throw new Error(`Failed to update lead column: ${response.status} ${response.statusText}`);
       }
       
       const result = await response.json();
-      console.log('API response:', result);
+      console.log('API response:', JSON.stringify(result));
       
-      // Invalidate queries to refresh data
+      // Verify the response contains the updated lead with the correct columnId
+      if (result.lead && result.lead.columnId !== destinationColumnId) {
+        console.warn(`Server returned lead with columnId ${result.lead.columnId}, but expected ${destinationColumnId}`);
+      }
+      
+      // Invalidate queries to refresh data from server
       queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
       queryClient.invalidateQueries({ queryKey: ['/api/columns'] });
       
       toast({
         title: 'Lead moved',
-        description: `${draggedLead.name} moved to ${columns[destinationColumnId].title}`,
+        description: `${draggedLead.name} moved to ${localColumns[destinationColumnId].title}`,
       });
     } catch (error) {
       console.error('Error moving lead:', error);
@@ -257,7 +291,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       
       toast({
         title: 'Error',
-        description: 'Failed to move lead. Please try again.',
+        description: 'Failed to move lead. Changes have been reverted.',
         variant: 'destructive'
       });
     }

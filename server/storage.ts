@@ -86,12 +86,26 @@ export class DatabaseStorage implements IStorage {
   }
   
   async updateLead(id: number, updateData: Partial<InsertLead>): Promise<Lead | undefined> {
-    const [updatedLead] = await db.update(leads)
-      .set(updateData)
-      .where(eq(leads.id, id))
-      .returning();
+    console.log(`[Storage] Updating lead ${id} with data:`, JSON.stringify(updateData));
     
-    return updatedLead || undefined;
+    try {
+      const [updatedLead] = await db.update(leads)
+        .set(updateData)
+        .where(eq(leads.id, id))
+        .returning();
+      
+      console.log(`[Storage] Lead update result:`, updatedLead ? 
+                  JSON.stringify({
+                    id: updatedLead.id,
+                    name: updatedLead.name,
+                    columnId: updatedLead.columnId
+                  }) : 'No lead returned');
+      
+      return updatedLead || undefined;
+    } catch (error) {
+      console.error(`[Storage] Error updating lead ${id}:`, error);
+      throw error;
+    }
   }
   
   async deleteLead(id: number): Promise<boolean> {
