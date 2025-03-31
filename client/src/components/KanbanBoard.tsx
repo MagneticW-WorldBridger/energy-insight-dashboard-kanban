@@ -99,7 +99,7 @@ interface KanbanBoardProps {
 }
 
 const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
-  const { searchTerm, filters } = useLeads();
+  const { searchTerm, filters, updateLeadColumn } = useLeads();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [showScrollButtons, setShowScrollButtons] = useState(true);
   const [localColumns, setLocalColumns] = useState(columns);
@@ -240,44 +240,12 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
     // Update local state immediately for a responsive UI
     setLocalColumns(updatedColumns);
     
-    // Make API request to update the lead's column
+    // Use context function to update lead column
     try {
-      console.log(`Sending PATCH request to update lead ${draggedLeadId} column to ${destinationColumnId}`);
+      console.log(`Updating lead ${draggedLeadId} column to ${destinationColumnId}`);
       
-      const response = await fetch(`/api/leads/${draggedLeadId}/column`, {
-        method: 'PATCH',
-        body: JSON.stringify({ columnId: destinationColumnId }),
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      // No need to explicitly dismiss the loading toast
-      // The new toast below will replace it
-      
-      if (!response.ok) {
-        let errorText = '';
-        try {
-          errorText = await response.text();
-        } catch (e) {
-          errorText = 'Could not parse error response';
-        }
-        
-        console.error('Server error response:', errorText);
-        throw new Error(`Failed to update lead column: ${response.status} ${response.statusText}`);
-      }
-      
-      const result = await response.json();
-      console.log('API response:', JSON.stringify(result));
-      
-      // Verify the response contains the updated lead with the correct columnId
-      if (result.lead && result.lead.columnId !== destinationColumnId) {
-        console.warn(`Server returned lead with columnId ${result.lead.columnId}, but expected ${destinationColumnId}`);
-      }
-      
-      // Invalidate queries to refresh data from server
-      queryClient.invalidateQueries({ queryKey: ['/api/leads'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/columns'] });
+      // Call the updateLeadColumn function from the context
+      await updateLeadColumn(draggedLeadId, destinationColumnId);
       
       toast({
         title: 'Lead moved',

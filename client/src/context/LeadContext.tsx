@@ -72,6 +72,7 @@ interface LeadContextProps {
   setView: React.Dispatch<React.SetStateAction<'kanban' | 'list'>>;
   isLoading: boolean;
   reloadLeads: () => void;
+  updateLeadColumn: (leadId: number, columnId: string) => Promise<void>;
 }
 
 const LeadContext = createContext<LeadContextProps | undefined>(undefined);
@@ -153,6 +154,28 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
   }, [leadsQuery.data, columnsQuery.data, statsQuery.data, leadState.stats]);
 
+  // Function to update a lead's column via API
+  const updateLeadColumn = async (leadId: number, columnId: string) => {
+    try {
+      const response = await fetch(`/api/leads/${leadId}/column`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ columnId }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to update lead column: ${response.statusText}`);
+      }
+      
+      // Reload leads after updating
+      reloadLeads();
+    } catch (error) {
+      console.error('Error updating lead column:', error);
+    }
+  };
+  
   return (
     <LeadContext.Provider value={{ 
       leadState, 
@@ -163,7 +186,8 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       view,
       setView,
       isLoading,
-      reloadLeads
+      reloadLeads,
+      updateLeadColumn
     }}>
       {children}
     </LeadContext.Provider>

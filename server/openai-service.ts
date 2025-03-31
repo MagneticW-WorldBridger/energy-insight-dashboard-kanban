@@ -53,7 +53,7 @@ export async function analyzeQuestionnaire(
     7. If I knew there would be no negative side effects such as pain, I would like to try cosmetic surgery. - Rating: ${questionnaire.q7}
     8. I am constantly thinking about having cosmetic surgery. - Rating: ${questionnaire.q8}
     9. I would seriously consider having cosmetic surgery if my partner thought it, was a good idea. - Rating: ${questionnaire.q9}
-    10. I would never have any kind of cosmetic surgery. - Rating: ${questionnaire.q10} (Note: This score is reversed)
+    10. I would never have any kind of cosmetic surgery. - Rating: ${questionnaire.q10} (Note: This question is reverse-scored, meaning a low score indicates higher likelihood of having surgery)
     11. I would have cosmetic surgery to keep looking young. - Rating: ${questionnaire.q11}
     12. It would benefit my career, I will have cosmetic surgery. - Rating: ${questionnaire.q12}
     13. I am considering having cosmetic surgery as I think my partner would find me more attractive. - Rating: ${questionnaire.q13}
