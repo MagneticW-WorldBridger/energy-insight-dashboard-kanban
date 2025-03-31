@@ -4,7 +4,7 @@ import { LeadState, FilterOptions } from '@/types/leads';
 const initialLeadState: LeadState = {
   columns: {
     newLeads: {
-      id: 'newLeads',
+      id: 'newLeads', // Este id debe coincidir exactamente con el valor en la base de datos
       title: 'New Leads',
       count: 28,
       items: [
@@ -60,8 +60,8 @@ const initialLeadState: LeadState = {
         }
       ]
     },
-    pendingSMS: {
-      id: 'pendingSMS',
+    phoneVerified: {
+      id: 'phoneVerified', // Nombre correcto según la base de datos
       title: 'SMS Sent',
       count: 14,
       items: [
@@ -115,8 +115,8 @@ const initialLeadState: LeadState = {
         }
       ]
     },
-    verified: {
-      id: 'verified',
+    questionnaireStarted: {
+      id: 'questionnaireStarted', // Nombre correcto según la base de datos
       title: 'Identity Verified',
       count: 32,
       items: [
@@ -186,8 +186,8 @@ const initialLeadState: LeadState = {
         }
       ]
     },
-    qualified: {
-      id: 'qualified',
+    questionnaireComplete: {
+      id: 'questionnaireComplete', // Nombre correcto según la base de datos
       title: 'Consultation Ready',
       count: 18,
       items: [
@@ -247,8 +247,54 @@ const initialLeadState: LeadState = {
         }
       ]
     },
-    failed: {
-      id: 'failed',
+    inProgress: {
+      id: 'inProgress', // Nombre correcto según la base de datos
+      title: 'In Progress',
+      count: 5,
+      items: [
+        { 
+          id: 20, 
+          name: 'Jennifer Adams', 
+          username: '@jennadams', 
+          time: '1d ago', 
+          source: 'Facebook Ad', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Breast', 'Consultation'],
+          assessment: {
+            likelihood: 8.1,
+            benefits: 7.4,
+            overall: "High Intent"
+          },
+          consultDate: 'Apr 5',
+          notes: "Scheduled for consultation next week"
+        }
+      ]
+    },
+    closed: {
+      id: 'closed', // Nombre correcto según la base de datos
+      title: 'Closed',
+      count: 3,
+      items: [
+        { 
+          id: 21, 
+          name: 'Michael Davis', 
+          username: '@mdavis', 
+          time: '3d ago', 
+          source: 'Referral', 
+          avatar: '/api/placeholder/40/40', 
+          tags: ['Face', 'Rhinoplasty'],
+          assessment: {
+            likelihood: 9.2,
+            benefits: 8.8,
+            overall: "High Intent"
+          },
+          consultDate: 'Mar 15',
+          notes: "Completed surgery on March 29"
+        }
+      ]
+    },
+    notInterested: {
+      id: 'notInterested', // Nombre correcto según la base de datos
       title: 'Failed Verification',
       count: 8,
       items: [
@@ -259,6 +305,7 @@ const initialLeadState: LeadState = {
           time: '1d ago', 
           source: 'Profile Visit', 
           avatar: '/api/placeholder/40/40', 
+          tags: ['Failed', 'SMS'],
           reason: 'SMS undeliverable',
           assessment: "Incomplete"
         },
@@ -269,6 +316,7 @@ const initialLeadState: LeadState = {
           time: '2d ago', 
           source: 'Story Ad', 
           avatar: '/api/placeholder/40/40', 
+          tags: ['Failed', 'Timeout'],
           reason: 'Verification timeout',
           assessment: "Incomplete"
         },
@@ -279,6 +327,7 @@ const initialLeadState: LeadState = {
           time: '2d ago', 
           source: 'Before/After Post', 
           avatar: '/api/placeholder/40/40', 
+          tags: ['Failed', 'Out of Area'],
           reason: 'Out of service area',
           assessment: {
             likelihood: 2.1,
