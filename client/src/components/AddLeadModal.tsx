@@ -52,6 +52,35 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
           [name]: value
         }
       }));
+    } else if (['sendTime', 'verifiedTime', 'consultDate'].includes(name)) {
+      // Special handling for date/time fields - prevent invalid dates
+      try {
+        // If value is empty, just use empty string
+        if (!value.trim()) {
+          setFormData(prev => ({
+            ...prev,
+            [name]: ''
+          }));
+        } else {
+          // Try to parse the date to validate it
+          const dateObj = new Date(value);
+          // Check if date is valid
+          if (!isNaN(dateObj.getTime())) {
+            setFormData(prev => ({
+              ...prev,
+              [name]: value // Store original formatted value
+            }));
+          } else {
+            console.warn(`Invalid date format for ${name}: ${value}`);
+            // Keep previous value if new one is invalid
+            setFormData(prev => prev);
+          }
+        }
+      } catch (error) {
+        console.warn(`Date parsing error for ${name}: ${error}`);
+        // Keep previous value if there's an error
+        setFormData(prev => prev);
+      }
     } else {
       setFormData(prev => ({
         ...prev,
@@ -86,10 +115,10 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
         
         // Handle optional fields
         smsStatus: formData.smsStatus === 'none' ? null : formData.smsStatus,
-        sendTime: formData.sendTime ? new Date().toISOString() : null,
-        verifiedTime: formData.verifiedTime ? new Date().toISOString() : null,
+        sendTime: formData.sendTime ? new Date(formData.sendTime).toISOString() : null,
+        verifiedTime: formData.verifiedTime ? new Date(formData.verifiedTime).toISOString() : null,
         priority: formData.priority === 'none' ? null : formData.priority,
-        consultDate: formData.consultDate ? new Date().toISOString() : null,
+        consultDate: formData.consultDate ? new Date(formData.consultDate).toISOString() : null,
         financing: formData.financing === 'none' ? null : formData.financing,
         reason: formData.reason || null,
         notes: formData.notes || null,
@@ -325,6 +354,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               <Input 
                 id="sendTime" 
                 name="sendTime" 
+                type="datetime-local"
                 value={formData.sendTime} 
                 onChange={handleChange} 
                 placeholder="10:30 AM" 
@@ -336,6 +366,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               <Input 
                 id="verifiedTime" 
                 name="verifiedTime" 
+                type="datetime-local"
                 value={formData.verifiedTime} 
                 onChange={handleChange} 
                 placeholder="11:45 AM" 
@@ -362,6 +393,7 @@ const AddLeadModal: React.FC<AddLeadModalProps> = ({ open, onOpenChange }) => {
               <Input 
                 id="consultDate" 
                 name="consultDate" 
+                type="date"
                 value={formData.consultDate} 
                 onChange={handleChange} 
                 placeholder="Mar 15, 2023" 

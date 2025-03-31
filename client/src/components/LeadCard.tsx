@@ -1,7 +1,25 @@
 import React, { useState } from 'react';
 import { Lead, Assessment } from '@/types/leads';
-import { MessageSquare, Clipboard, MoreHorizontal, Calendar, TrendingUp } from 'lucide-react';
+import { MessageSquare, Clipboard, MoreHorizontal, Calendar, TrendingUp, Trash2, X } from 'lucide-react';
 import QuestionnaireModal from './QuestionnaireModal';
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
+} from "@/components/ui/dropdown-menu";
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+import { useLeads } from '@/context/LeadContext';
 
 interface LeadCardProps {
   lead: Lead;
@@ -10,6 +28,9 @@ interface LeadCardProps {
 
 const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
   const [showQuestionnaire, setShowQuestionnaire] = useState(false);
+  const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+  const { toast } = useToast();
+  const { reloadLeads } = useLeads();
   
   // Parse assessment if it's a string representation of an object
   const getAssessment = (): Assessment | undefined => {
@@ -100,6 +121,34 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
   const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
     // Remove the dragging class
     e.currentTarget.classList.remove('opacity-70');
+  };
+  
+  // Function to delete a lead
+  const deleteLead = async () => {
+    try {
+      const response = await fetch(`/api/leads/${lead.id}`, {
+        method: 'DELETE',
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Failed to delete lead: ${response.statusText}`);
+      }
+      
+      toast({
+        title: "Lead deleted",
+        description: `${lead.name} has been removed successfully`,
+      });
+      
+      // Reload the leads
+      reloadLeads();
+    } catch (error) {
+      console.error('Error deleting lead:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete lead",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -251,9 +300,23 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
               >
                 <Clipboard className="h-4 w-4 text-gray-500" />
               </button>
-              <button className="p-1 hover:bg-gray-100 rounded">
-                <MoreHorizontal className="h-4 w-4 text-gray-500" />
-              </button>
+              
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="p-1 hover:bg-gray-100 rounded">
+                    <MoreHorizontal className="h-4 w-4 text-gray-500" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem
+                    className="text-red-600 focus:text-red-600 cursor-pointer"
+                    onClick={() => setShowDeleteAlert(true)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-2" />
+                    Delete Lead
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
         </div>
@@ -265,6 +328,25 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
         questionnaire={lead.questionnaire}
         assessment={getAssessment()}
       />
+      
+      {/* Delete Confirmation Modal */}
+      <AlertDialog open={showDeleteAlert} onOpenChange={setShowDeleteAlert}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently remove <strong>{lead.name}</strong> from the lead database. 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={deleteLead} className="bg-red-600 hover:bg-red-700">
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 };
