@@ -6,7 +6,7 @@ import { MoreHorizontal, ChevronLeft, ChevronRight } from 'lucide-react';
 interface LeadColumnProps {
   column: LeadColumnType;
   onDragStart?: (id: number) => void;
-  onDrop?: (id: number) => void;
+  onDrop?: (id: string) => void;
 }
 
 const LeadColumn: React.FC<LeadColumnProps> = ({ column, onDragStart, onDrop }) => {
@@ -47,7 +47,8 @@ const LeadColumn: React.FC<LeadColumnProps> = ({ column, onDragStart, onDrop }) 
     if (collapsed) return;
     
     if (onDrop) {
-      onDrop(parseInt(column.id));
+      // The column.id is already a string, so we can pass it directly to onDrop
+      onDrop(column.id);
     }
   };
   

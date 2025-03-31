@@ -31,7 +31,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
   };
 
   // Handle drop on a column
-  const handleDrop = useCallback(async (columnId: number) => {
+  const handleDrop = useCallback(async (columnId: string) => {
     if (!draggedLeadId || !isDragging) return;
     
     try {
@@ -49,22 +49,26 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
         }
       }
       
-      if (!draggedLead || !originalColumnId || originalColumnId === columnId.toString()) {
+      if (!draggedLead || !originalColumnId || originalColumnId === columnId) {
         setIsDragging(false);
         setDraggedLeadId(null);
         return;
       }
       
+      console.log(`Moving lead ${draggedLeadId} from column ${originalColumnId} to column ${columnId}`);
+      
       // Make API request to update the lead's column
       const response = await fetch(`/api/leads/${draggedLeadId}/column`, {
         method: 'PATCH',
-        body: JSON.stringify({ columnId: columnId.toString() }),
+        body: JSON.stringify({ columnId }),
         headers: {
           'Content-Type': 'application/json'
         }
       });
       
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Server response:', errorText);
         throw new Error(`Failed to update lead column: ${response.statusText}`);
       }
       
@@ -74,7 +78,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ columns }) => {
       
       toast({
         title: 'Lead moved',
-        description: `${draggedLead.name} moved to ${columns[columnId.toString()].title}`,
+        description: `${draggedLead.name} moved to ${columns[columnId].title}`,
       });
       
     } catch (error) {
