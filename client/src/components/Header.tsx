@@ -13,10 +13,9 @@ const Header: React.FC = () => {
             <button className="p-2 rounded-md hover:bg-gray-800 lg:hidden">
               <Menu className="h-6 w-6" />
             </button>
-            <div className="flex items-center">
+            <div className="flex items-center" aria-label="Rural King">
               <img src="https://www.ruralking.com/RKStorefrontAssetStore/images/type-icons/hcl-logo-footer.webp" alt="Rural King" className="h-6 w-auto mr-2" />
-              <span className="text-amber-300 font-bold text-xl">Rural King</span>
-              <span className="text-gray-300 ml-1 hidden md:inline">| Lead Pipeline</span>
+              <span className="text-gray-300 ml-1 hidden md:inline">Lead Pipeline</span>
             </div>
           </div>
           
