@@ -73,6 +73,7 @@ interface LeadContextProps {
   isLoading: boolean;
   reloadLeads: () => void;
   updateLeadColumn: (leadId: number, columnId: string) => Promise<void>;
+  updateLead: (leadId: number, data: Record<string, any>) => Promise<void>;
 }
 
 const LeadContext = createContext<LeadContextProps | undefined>(undefined);
@@ -175,6 +176,23 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       console.error('Error updating lead column:', error);
     }
   };
+
+  // Generic lead update
+  const updateLead = async (leadId: number, data: Record<string, any>) => {
+    try {
+      const response = await fetch(`/api/leads/${leadId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      if (!response.ok) throw new Error(`Failed to update lead: ${response.statusText}`);
+      reloadLeads();
+    } catch (error) {
+      console.error('Error updating lead:', error);
+    }
+  };
   
   return (
     <LeadContext.Provider value={{ 
@@ -187,7 +205,8 @@ export const LeadProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       setView,
       isLoading,
       reloadLeads,
-      updateLeadColumn
+      updateLeadColumn,
+      updateLead
     }}>
       {children}
     </LeadContext.Provider>

@@ -70,6 +70,20 @@ const Dashboard: React.FC = () => {
   return (
     <div className="flex flex-col h-screen">
       {!isEmbed && <Header />}
+      {!isEmbed && (
+        <div className="bg-[color:hsl(var(--rk-muted))] border-b border-gray-200">
+          <div className="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div>
+              <h1 className="text-lg font-semibold text-[color:hsl(var(--rk-text))]">Rural King Lead Pipeline</h1>
+              <span className="inline-flex items-center text-[11px] mt-1 px-2 py-0.5 rounded bg-white border text-gray-700">Phase 1 Demo</span>
+            </div>
+            <div className="hidden md:flex items-center space-x-2 text-xs">
+              <span className="px-2 py-0.5 rounded bg-white border">Live Data</span>
+              <span className="px-2 py-0.5 rounded bg-white border">Data Wiring In Progress</span>
+            </div>
+          </div>
+        </div>
+      )}
       {!isEmbed && <StatsBar stats={leadState.stats} />}
       {!isEmbed && (
         <div className="flex items-center justify-between px-4 py-3">

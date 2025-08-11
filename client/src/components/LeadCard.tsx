@@ -154,7 +154,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
   return (
     <>
       <div 
-        className="bg-white rounded-md shadow-sm border border-gray-100 overflow-hidden hover:shadow transition-shadow duration-200"
+        className="bg-white rounded-md rk-card border border-gray-100 overflow-hidden hover:shadow transition-shadow duration-200 focus-within:ring-2 focus-within:ring-[color:hsl(var(--rk-primary))]"
         data-lead-id={lead.id}
       >
         <div className="p-3">
@@ -245,11 +245,11 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
                   </span>
                 ))}
               </div>
-              
-              {lead.score && (
-                <div className="flex items-center bg-gray-100 px-2 py-0.5 rounded">
-                  <TrendingUp className="h-3 w-3 text-gray-700 mr-1" />
-                  <span className="text-xs font-medium">{lead.score}</span>
+              {typeof lead.assessment !== 'string' && lead.assessment.likelihood !== undefined && (
+                <div className="flex items-center space-x-1">
+                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(lead.assessment.likelihood/10)*100}%`, backgroundColor: '#C8102E', height: '100%' }}></div></div>
+                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(lead.assessment.benefits/10)*100}%`, backgroundColor: '#F59E0B', height: '100%' }}></div></div>
+                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(((lead.assessment as any).readiness||0)/10)*100}%`, backgroundColor: '#2563EB', height: '100%' }}></div></div>
                 </div>
               )}
             </div>
