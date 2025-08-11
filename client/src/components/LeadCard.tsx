@@ -257,25 +257,36 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
           
           {typeof lead.assessment !== 'string' && lead.assessment.likelihood !== undefined && lead.assessment.benefits !== undefined && (
             <div className="mt-3 pt-2 border-t border-gray-100">
-              <div className="flex items-center justify-between mb-1.5">
-                <span className="text-xs text-gray-500">Likelihood:</span>
-                <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-amber-400 h-full" 
-                    style={{ width: `${(lead.assessment.likelihood / 10) * 100}%` }}
-                  ></div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-gray-500">Likelihood</span>
+                    <span className="text-[10px] font-medium">{lead.assessment.likelihood}</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden" aria-label="Likelihood">
+                    <div className="h-full" style={{ width: `${(lead.assessment.likelihood / 10) * 100}%`, backgroundColor: '#C8102E' }}></div>
+                  </div>
                 </div>
-                <span className="text-xs font-medium">{lead.assessment.likelihood}</span>
-              </div>
-              <div className="flex items-center justify-between">
-                <span className="text-xs text-gray-500">Benefits:</span>
-                <div className="w-28 h-2 bg-gray-200 rounded-full overflow-hidden">
-                  <div 
-                    className="bg-amber-400 h-full" 
-                    style={{ width: `${(lead.assessment.benefits / 10) * 100}%` }}
-                  ></div>
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-[10px] text-gray-500">Value</span>
+                    <span className="text-[10px] font-medium">{lead.assessment.benefits}</span>
+                  </div>
+                  <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden" aria-label="Perceived value">
+                    <div className="h-full" style={{ width: `${(lead.assessment.benefits / 10) * 100}%`, backgroundColor: '#F59E0B' }}></div>
+                  </div>
                 </div>
-                <span className="text-xs font-medium">{lead.assessment.benefits}</span>
+                {lead.assessment && (lead.assessment as any).readiness !== undefined && (
+                  <div>
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-[10px] text-gray-500">Readiness</span>
+                      <span className="text-[10px] font-medium">{(lead.assessment as any).readiness}</span>
+                    </div>
+                    <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden" aria-label="Readiness">
+                      <div className="h-full" style={{ width: `${(((lead.assessment as any).readiness || 0) / 10) * 100}%`, backgroundColor: '#2563EB' }}></div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           )}
