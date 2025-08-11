@@ -3,6 +3,7 @@
 
 // Healthcheck endpoint compatible con Vercel
 export default async (req, res) => {
+    res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self' https://woodstock-technical-chatbot-full-fe.vercel.app;");
     console.log('Healthcheck endpoint called', { 
       url: req.url,
       method: req.method,

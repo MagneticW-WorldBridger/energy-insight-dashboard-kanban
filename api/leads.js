@@ -244,6 +244,7 @@ async function initDb() {
 
 // Handler principal
 export default async (req, res) => {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self' https://woodstock-technical-chatbot-full-fe.vercel.app;");
   // Logs detallados para diagnosticar el request en Vercel
   console.log('[API:leads] Request details', { 
     url: req.url,

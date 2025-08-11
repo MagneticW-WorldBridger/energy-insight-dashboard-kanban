@@ -7,6 +7,7 @@ import FormData from 'form-data';
  * @param {import('express').Response} res
  */
 export default async function handler(req, res) {
+  res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self' https://woodstock-technical-chatbot-full-fe.vercel.app;");
   // Configurar CORS para permitir solicitudes desde cualquier origen
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');

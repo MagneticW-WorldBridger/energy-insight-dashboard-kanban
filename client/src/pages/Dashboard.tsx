@@ -65,23 +65,27 @@ const Dashboard: React.FC = () => {
     );
   }
 
+  const isEmbed = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('embed') === '1';
+
   return (
     <div className="flex flex-col h-screen">
-      <Header />
-      <StatsBar stats={leadState.stats} />
-      <div className="flex items-center justify-between px-4 py-3">
-        <FilterBar />
-        <Button 
-          onClick={() => setShowAddLeadModal(true)}
-          className="ml-4 bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2"
-        >
-          <UserPlus className="h-4 w-4" />
-          <span>Add Lead</span>
-        </Button>
+      {!isEmbed && <Header />}
+      {!isEmbed && <StatsBar stats={leadState.stats} />}
+      {!isEmbed && (
+        <div className="flex items-center justify-between px-4 py-3">
+          <FilterBar />
+          <Button 
+            onClick={() => setShowAddLeadModal(true)}
+            className="ml-4 bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2"
+          >
+            <UserPlus className="h-4 w-4" />
+            <span>Add Lead</span>
+          </Button>
+        </div>
+      )}
+      <div className="flex-1">
+        <KanbanBoard columns={leadState.columns} />
       </div>
-      <KanbanBoard columns={leadState.columns} />
-      
-      {/* Modal to add a new lead */}
       <AddLeadModal 
         open={showAddLeadModal} 
         onOpenChange={setShowAddLeadModal} 
