@@ -322,6 +322,14 @@ export default async (req, res) => {
             console.warn('[API:leads] Error parsing contact_info:', e);
           }
         }
+        // Parse assessment JSON string if present
+        if (lead.assessment && typeof lead.assessment === 'string') {
+          try {
+            camelLead.assessment = JSON.parse(lead.assessment);
+          } catch (e) {
+            // ignore
+          }
+        }
         
         // Add the contact_info field directly to preserve the original data
         camelLead.contact_info = lead.contact_info;
@@ -473,6 +481,14 @@ export default async (req, res) => {
             camelCaseLead.contactInfo = JSON.parse(updatedLead.contact_info);
           } catch (e) {
             console.warn('[API:leads] Error parsing contact_info:', e);
+          }
+        }
+        // Parse assessment string if present
+        if (updatedLead.assessment && typeof updatedLead.assessment === 'string') {
+          try {
+            camelCaseLead.assessment = JSON.parse(updatedLead.assessment);
+          } catch (e) {
+            // ignore
           }
         }
       }
