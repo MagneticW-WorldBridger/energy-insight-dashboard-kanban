@@ -60,6 +60,13 @@ async function initDb() {
 // Handler principal
 export default async (req, res) => {
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self' https://woodstock-technical-chatbot-full-fe.vercel.app;");
+  // Optional agent auth
+  const agentKey = req.headers['x-agent-key'] || req.headers['X-Agent-Key'];
+  if (process.env.ELEVENLABS_API_KEY) {
+    if (!agentKey || agentKey !== process.env.ELEVENLABS_API_KEY) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+  }
   console.log('[API:columns] Request received', { 
     url: req.url,
     method: req.method,

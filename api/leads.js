@@ -245,6 +245,13 @@ async function initDb() {
 // Handler principal
 export default async (req, res) => {
   res.setHeader('Content-Security-Policy', "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'self' https://woodstock-technical-chatbot-full-fe.vercel.app;");
+  // Optional agent auth
+  const agentKey = req.headers['x-agent-key'] || req.headers['X-Agent-Key'];
+  if (process.env.ELEVENLABS_API_KEY) {
+    if (!agentKey || agentKey !== process.env.ELEVENLABS_API_KEY) {
+      return res.status(403).json({ message: 'Forbidden' });
+    }
+  }
   // Logs detallados para diagnosticar el request en Vercel
   console.log('[API:leads] Request details', { 
     url: req.url,
@@ -308,7 +315,17 @@ export default async (req, res) => {
     // GET /api/leads
     if (req.method === 'GET') {
       console.log('[API:leads] Getting all leads');
-      const leads = await storage.getLeads();
+      // Support optional id query param
+      let url;
+      try { url = new URL(req.url, `https://${req.headers.host}`); } catch {}
+      const idParam = url?.searchParams?.get('id');
+      let leads = [];
+      if (idParam) {
+        const one = await storage.getLead(parseInt(idParam));
+        leads = one ? [one] : [];
+      } else {
+        leads = await storage.getLeads();
+      }
       
       // Convertir todos los leads a camelCase y asegurar que tienen columnId
       const formattedLeads = leads.map(lead => {
@@ -382,11 +399,16 @@ export default async (req, res) => {
         id = parseInt(idMatch[1]);
       } 
       // Método 2: Intentar extraer de los parámetros de consulta
-      else if (req.query && req.query.id) {
-        id = parseInt(req.query.id);
+      else {
+        let qid;
+        try {
+          const u = new URL(req.url, `https://${req.headers.host}`);
+          qid = u.searchParams.get('id');
+        } catch {}
+        if (qid) id = parseInt(qid);
       } 
       // Método 3: Fallback al método anterior
-      else {
+      if (!id) {
         const pathParts = req.url.split('/');
         const idIndex = pathParts.findIndex(part => /^\d+$/.test(part));
         if (idIndex !== -1) {
