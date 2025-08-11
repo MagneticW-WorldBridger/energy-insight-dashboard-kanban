@@ -245,13 +245,7 @@ const LeadCard: React.FC<LeadCardProps> = ({ lead, onDragStart }) => {
                   </span>
                 ))}
               </div>
-              {typeof lead.assessment !== 'string' && lead.assessment.likelihood !== undefined && (
-                <div className="flex items-center space-x-1">
-                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(lead.assessment.likelihood/10)*100}%`, backgroundColor: '#C8102E', height: '100%' }}></div></div>
-                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(lead.assessment.benefits/10)*100}%`, backgroundColor: '#F59E0B', height: '100%' }}></div></div>
-                  <div className="w-10 h-1.5 bg-gray-200 rounded overflow-hidden"><div style={{ width: `${(((lead.assessment as any).readiness||0)/10)*100}%`, backgroundColor: '#2563EB', height: '100%' }}></div></div>
-                </div>
-              )}
+              {/* mini meters removed per request */}
             </div>
           )}
           
