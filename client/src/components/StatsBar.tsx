@@ -40,7 +40,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ stats }) => {
               <Calendar className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-xs text-gray-500 mb-0.5">Consults Booked</p>
+              <p className="text-xs text-gray-500 mb-0.5">Follow-ups Scheduled</p>
               <p className="text-lg font-semibold">{stats.consultsBooked}</p>
             </div>
           </div>

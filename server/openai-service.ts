@@ -33,37 +33,29 @@ export async function analyzeQuestionnaire(
   questionnaire: QuestionnaireResponses
 ): Promise<AssessmentResult | null> {
   try {
-    // Check if we have a complete questionnaire (all 15 questions answered)
+    // Rural King: require at least 5 answered items
     const responses = Object.values(questionnaire).filter(Boolean);
-    if (responses.length < 15) {
-      console.warn(`Incomplete questionnaire: ${responses.length}/15 questions answered`);
+    if (responses.length < 5) {
+      console.warn(`Incomplete questionnaire: ${responses.length}/7 questions answered`);
       return null;
     }
 
     // Create a prompt for OpenAI analysis
     const prompt = `
-    I have a patient questionnaire about cosmetic surgery. The patient rated the following statements on a scale from 1 (strongly disagree) to 7 (strongly agree):
+    I have a customer questionnaire for a farm/ranch retail pipeline. The customer rated the following statements on a scale from 1 (strongly disagree) to 7 (strongly agree):
 
-    1. It makes sense to have cosmetic surgery rather than spending years feeling bad about the way I look. - Rating: ${questionnaire.q1}
-    2. Cosmetic surgery is a good thing because it can help me feel better about myself. - Rating: ${questionnaire.q2}
-    3. Within next 2 months, I will end up having some cosmetic surgery. - Rating: ${questionnaire.q3}
-    4. I am very unhappy with my physical appearance, and I am considering cosmetic surgery. - Rating: ${questionnaire.q4}
-    5. I think cosmetic surgery can make me happier with the way I look, and I am willing to go for it. - Rating: ${questionnaire.q5}
-    6. If I could have a cosmetic surgery done for a fair price, I would consider cosmetic surgery. - Rating: ${questionnaire.q6}
-    7. If I knew there would be no negative side effects such as pain, I would like to try cosmetic surgery. - Rating: ${questionnaire.q7}
-    8. I am constantly thinking about having cosmetic surgery. - Rating: ${questionnaire.q8}
-    9. I would seriously consider having cosmetic surgery if my partner thought it, was a good idea. - Rating: ${questionnaire.q9}
-    10. I would never have any kind of cosmetic surgery. - Rating: ${questionnaire.q10} (Note: This question is reverse-scored, meaning a low score indicates higher likelihood of having surgery)
-    11. I would have cosmetic surgery to keep looking young. - Rating: ${questionnaire.q11}
-    12. It would benefit my career, I will have cosmetic surgery. - Rating: ${questionnaire.q12}
-    13. I am considering having cosmetic surgery as I think my partner would find me more attractive. - Rating: ${questionnaire.q13}
-    14. Cosmetic surgery can be a big benefit to my self-image. - Rating: ${questionnaire.q14}
-    15. I think Cosmetic procedure would make me more attractive to others, and that's why I will go for it. - Rating: ${questionnaire.q15}
+    1. I am actively shopping for farm, ranch, or outdoor products. - Rating: ${questionnaire.q1}
+    2. I have a budget in mind for my next purchase. - Rating: ${questionnaire.q2}
+    3. I prefer to buy within the next 30 days. - Rating: ${questionnaire.q3}
+    4. I am the decision-maker for this purchase. - Rating: ${questionnaire.q4}
+    5. I am comfortable ordering online for pickup or delivery. - Rating: ${questionnaire.q5}
+    6. I’m interested in deals or financing options. - Rating: ${questionnaire.q6}
+    7. I want personalized recommendations for my needs. - Rating: ${questionnaire.q7}
 
     Analyze these responses and provide:
 
-    1. Likelihood of having cosmetic surgery score (0-10 scale)
-    2. Perceived benefits of cosmetic surgery score (0-10 scale)
+    1. Purchase intent score (0-10 scale)
+    2. Perceived value score (0-10 scale)
     3. An overall assessment category: "High Intent", "Medium Intent", or "Low Intent"
 
     Note that question 10 is reverse-scored, meaning a low score indicates higher likelihood.

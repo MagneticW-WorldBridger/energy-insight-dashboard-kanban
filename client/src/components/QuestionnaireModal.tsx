@@ -10,21 +10,13 @@ interface QuestionnaireModalProps {
 }
 
 const questions = [
-  "It makes sense to have cosmetic surgery rather than spending years feeling bad about the way I look.",
-  "Cosmetic surgery is a good thing because it can help me feel better about myself.",
-  "Within next 2 months, I will end up having some cosmetic surgery.",
-  "I am very unhappy with my physical appearance, and I am considering cosmetic surgery.",
-  "I think cosmetic surgery can make me happier with the way I look, and I am willing to go for it.",
-  "If I could have a cosmetic surgery done for a fair price, I would consider cosmetic surgery.",
-  "If I knew there would be no negative side effects such as pain, I would like to try cosmetic surgery.",
-  "I am constantly thinking about having cosmetic surgery.",
-  "I would seriously consider having cosmetic surgery if my partner thought it, was a good idea.",
-  "I would never have any kind of cosmetic surgery (R).",
-  "I would have cosmetic surgery to keep looking young.",
-  "It would benefit my career, I will have cosmetic surgery.",
-  "I am considering having cosmetic surgery as I think my partner would find me more attractive.",
-  "Cosmetic surgery can be a big benefit to my self-image.",
-  "I think Cosmetic procedure would make me more attractive to others, and that's why I will go for it."
+  "I am actively shopping for farm, ranch, or outdoor products.",
+  "I have a budget in mind for my next purchase.",
+  "I prefer to buy within the next 30 days.",
+  "I am the decision-maker for this purchase.",
+  "I am comfortable ordering online for pickup or delivery.",
+  "I’m interested in deals or financing options.",
+  "I want personalized recommendations for my needs."
 ];
 
 const QuestionnaireModal: React.FC<QuestionnaireModalProps> = ({ 
@@ -35,7 +27,7 @@ const QuestionnaireModal: React.FC<QuestionnaireModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const isComplete = questionnaire && Object.values(questionnaire).filter(Boolean).length === 15;
+  const isComplete = questionnaire && Object.values(questionnaire).filter(Boolean).length >= 5;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -61,7 +53,7 @@ const QuestionnaireModal: React.FC<QuestionnaireModalProps> = ({
             <>
               <div className="mb-6">
                 <p className="text-sm text-gray-500 mb-2">
-                  Responses scored on a scale of 1-7 (Strongly Disagree to Strongly Agree)
+                   Responses scored on a scale of 1-7 (Strongly Disagree to Strongly Agree)
                 </p>
                 
                 {isComplete && assessment && typeof assessment !== 'string' && (
@@ -69,7 +61,7 @@ const QuestionnaireModal: React.FC<QuestionnaireModalProps> = ({
                     <h4 className="font-medium text-gray-900 mb-2">Assessment Summary</h4>
                     <div className="flex flex-col space-y-2">
                       <div>
-                        <p className="text-sm text-gray-700 mb-1">Likelihood of having cosmetic surgery:</p>
+                         <p className="text-sm text-gray-700 mb-1">Purchase intent:</p>
                         <div className="flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
                             <div 
@@ -82,7 +74,7 @@ const QuestionnaireModal: React.FC<QuestionnaireModalProps> = ({
                       </div>
                       
                       <div>
-                        <p className="text-sm text-gray-700 mb-1">Perceived benefits of cosmetic surgery:</p>
+                         <p className="text-sm text-gray-700 mb-1">Perceived value:</p>
                         <div className="flex items-center">
                           <div className="w-full bg-gray-200 rounded-full h-2.5 mr-2">
                             <div 
