@@ -16,7 +16,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ stats }) => {
       <div className="container mx-auto">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-md bg-blue-100 text-blue-600 flex items-center justify-center mr-3">
+            <div className="w-10 h-10 rounded-md bg-[color:hsl(var(--rk-muted))] text-[color:hsl(var(--rk-info))] flex items-center justify-center mr-3">
               <Users className="h-5 w-5" />
             </div>
             <div>
@@ -26,7 +26,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ stats }) => {
           </div>
           
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-md bg-green-100 text-green-600 flex items-center justify-center mr-3">
+            <div className="w-10 h-10 rounded-md bg-[color:hsl(var(--rk-muted))] text-[color:hsl(var(--rk-success))] flex items-center justify-center mr-3">
               <BookMarked className="h-5 w-5" />
             </div>
             <div>
@@ -36,7 +36,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ stats }) => {
           </div>
           
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-md bg-purple-100 text-purple-600 flex items-center justify-center mr-3">
+            <div className="w-10 h-10 rounded-md bg-[color:hsl(var(--rk-muted))] text-purple-600 flex items-center justify-center mr-3">
               <Calendar className="h-5 w-5" />
             </div>
             <div>
@@ -46,7 +46,7 @@ const StatsBar: React.FC<StatsBarProps> = ({ stats }) => {
           </div>
           
           <div className="flex items-center">
-            <div className="w-10 h-10 rounded-md bg-amber-100 text-amber-600 flex items-center justify-center mr-3">
+            <div className="w-10 h-10 rounded-md bg-[color:hsl(var(--rk-muted))] text-[color:hsl(var(--rk-accent))] flex items-center justify-center mr-3">
               <MessageSquare className="h-5 w-5" />
             </div>
             <div>
